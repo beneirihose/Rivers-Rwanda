@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   ShieldCheck
 } from 'lucide-react';
+import BookingForm from '../../components/forms/BookingForm';
 
 const CarDetailPage = () => {
   const { id } = useParams();
@@ -22,6 +23,7 @@ const CarDetailPage = () => {
   const [car, setCar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [showBookingForm, setShowBookingForm] = useState(false);
 
   useEffect(() => {
     const fetchCarDetail = async () => {
@@ -36,27 +38,6 @@ const CarDetailPage = () => {
     };
     fetchCarDetail();
   }, [id]);
-
-  const handleBooking = async () => {
-    if (!localStorage.getItem('token')) {
-      toast.error('Please login to continue');
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const price = car.purpose === 'rent' ? car.daily_rate : car.sale_price;
-      await api.post('/bookings', {
-        booking_type: car.purpose === 'rent' ? 'vehicle_rent' : 'vehicle_purchase',
-        vehicle_id: id,
-        total_amount: price,
-      });
-      toast.success(car.purpose === 'rent' ? 'Rental request sent!' : 'Purchase inquiry sent!');
-      navigate('/client/bookings');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Action failed');
-    }
-  };
 
   const parseImages = (imagesData: any) => {
     if (!imagesData) return [];
@@ -211,36 +192,16 @@ const CarDetailPage = () => {
                   Secure This <span className="text-accent-orange">Vehicle</span>
                 </h3>
 
-                <ul className="space-y-6 mb-10 relative z-10">
-                  <li className="flex items-start gap-4">
-                    <CheckCircle2 className="text-accent-orange shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="font-bold text-sm uppercase tracking-tight">Verified Quality</p>
-                      <p className="text-xs text-gray-400 mt-1">Rigorous inspection conducted on all vehicles.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <ShieldCheck className="text-accent-orange shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="font-bold text-sm uppercase tracking-tight">Insured & Protected</p>
-                      <p className="text-xs text-gray-400 mt-1">Full comprehensive insurance coverage included.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <Calendar className="text-accent-orange shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="font-bold text-sm uppercase tracking-tight">Instant Confirmation</p>
-                      <p className="text-xs text-gray-400 mt-1">Quick response time from our concierge team.</p>
-                    </div>
-                  </li>
-                </ul>
-
-                <button 
-                  onClick={handleBooking}
-                  className="w-full bg-accent-orange text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl relative z-10"
-                >
-                  {car.purpose === 'rent' ? 'Book Rental Now' : 'Inquire Purchase'}
-                </button>
+                {!showBookingForm ? (
+                  <button 
+                    onClick={() => setShowBookingForm(true)}
+                    className="w-full bg-accent-orange text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl relative z-10"
+                  >
+                    {car.purpose === 'rent' ? 'Book Rental Now' : 'Inquire Purchase'}
+                  </button>
+                ) : (
+                  <BookingForm item={car} itemType="vehicle" />
+                )}
               </div>
 
               <div className="bg-white rounded-[2rem] p-8 border border-gray-100 flex items-center gap-6 group hover:border-accent-orange transition-all cursor-pointer">

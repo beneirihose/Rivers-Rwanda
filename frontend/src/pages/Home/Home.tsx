@@ -4,7 +4,8 @@ import StatsSection from '../../components/home/StatsSection/StatsSection';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Clock, Award, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import FeaturedVehicles from '../../components/home/FeaturedVehicles/FeaturedVehicles'; // Import the new component
+import FeaturedVehicles from '../../components/home/FeaturedVehicles/FeaturedVehicles';
+import FeaturedHouses from '../../components/home/FeaturedHouses/FeaturedHouses'; // Import the new component
 
 const Home = () => {
   return (
@@ -14,6 +15,20 @@ const Home = () => {
       <div className="container mx-auto py-12 px-4">
         {/* Featured Listings Section */}
         <FeaturedListings />
+
+        {/* Featured Houses Section */}
+        <section className="py-20">
+            <div className="text-center mb-16">
+                <h2 className="text-accent-orange font-black uppercase tracking-[0.3em] text-xs mb-4">Our Properties</h2>
+                <h3 className="text-4xl font-black text-primary-dark tracking-tighter uppercase">Featured <span className="text-accent-orange">Houses</span></h3>
+            </div>
+            <FeaturedHouses />
+            <div className="text-center mt-16">
+                <Link to="/houses" className="bg-primary-dark text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-accent-orange transition-all duration-500 shadow-xl">
+                    View All Houses
+                </Link>
+            </div>
+        </section>
 
         {/* Featured Vehicles Section */}
         <section className="py-20">

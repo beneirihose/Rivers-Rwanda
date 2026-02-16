@@ -50,6 +50,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { label: 'Users', path: '/admin/users', icon: <UsersIcon size={20} /> },
       { label: 'Accommodations', path: '/admin/accommodations', icon: <Home size={20} /> },
       { label: 'Vehicles', path: '/admin/vehicles', icon: <Car size={20} /> },
+      { label: 'Houses', path: '/admin/houses', icon: <Home size={20} /> },
       { label: 'Bookings', path: '/admin/bookings', icon: <BookOpen size={20} /> },
       { label: 'Agents', path: '/admin/agents', icon: <ShieldCheck size={20} /> },
       { label: 'Inquiries', path: '/admin/inquiries', icon: <MessageSquare size={20} /> },

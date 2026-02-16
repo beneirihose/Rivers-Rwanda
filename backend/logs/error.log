@@ -98,3 +98,7 @@
 {"level":"error","message":"500 - Bind parameters must not contain undefined. To pass SQL NULL specify JS null - /api/v1/agents/commissions - GET - ::1","timestamp":"2026-02-15T11:20:11.570Z"}
 {"level":"error","message":"500 - Bind parameters must not contain undefined. To pass SQL NULL specify JS null - /api/v1/agents/commissions - GET - ::1","timestamp":"2026-02-15T11:20:11.578Z"}
 {"level":"error","message":"500 - Data truncated for column 'user_id' at row 1 - /api/v1/users/profile - PATCH - ::1","timestamp":"2026-02-15T11:30:59.340Z"}
+{"level":"error","message":"500 - Bind parameters must not contain undefined. To pass SQL NULL specify JS null - /api/v1/bookings - POST - ::1","timestamp":"2026-02-16T08:23:14.374Z"}
+{"level":"error","message":"500 - Table 'rivers_rwanda.houses' doesn't exist - /api/v1/admin/stats - GET - ::1","timestamp":"2026-02-16T08:59:02.659Z"}
+{"level":"error","message":"500 - Table 'rivers_rwanda.houses' doesn't exist - /api/v1/admin/stats - GET - ::1","timestamp":"2026-02-16T08:59:02.703Z"}
+{"level":"error","message":"500 - Incorrect integer value: 'true' for column 'has_parking' at row 1 - /api/v1/houses - POST - ::1","timestamp":"2026-02-16T09:17:13.694Z"}

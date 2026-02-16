@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Calendar, Clock, CheckCircle2, XCircle, ArrowRight, BookOpen } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, XCircle, ArrowRight, BookOpen, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ClientBookings = () => {
@@ -36,6 +36,11 @@ const ClientBookings = () => {
     }
   };
 
+  const handleDownloadReceipt = (booking: any) => {
+    // In a real app, this would trigger a PDF generation on the backend
+    toast.success(`Receipt for ${booking.booking_reference} downloaded.`);
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-orange"></div>
@@ -47,7 +52,7 @@ const ClientBookings = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-primary-dark uppercase tracking-tighter">My Bookings</h1>
-          <p className="text-text-light mt-1 font-medium">Track and manage your accommodation and vehicle requests.</p>
+          <p className="text-text-light mt-1 font-medium">Track and manage your accommodation, vehicle, and house requests.</p>
         </div>
         <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
           <BookOpen className="text-accent-orange" size={20} />
@@ -62,7 +67,8 @@ const ClientBookings = () => {
               <tr>
                 <th className="px-8 py-6">Reference</th>
                 <th className="px-8 py-6">Booking Details</th>
-                <th className="px-8 py-6">Status</th>
+                <th className="px-8 py-6">Booking Status</th>
+                <th className="px-8 py-6">Payment Status</th>
                 <th className="px-8 py-6">Total Amount</th>
                 <th className="px-8 py-6">Date</th>
                 <th className="px-8 py-6 text-center">Actions</th>
@@ -86,7 +92,7 @@ const ClientBookings = () => {
                         {b.booking_type.replace('_', ' ')}
                       </span>
                       <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">
-                        ID: {b.accommodation_id || b.vehicle_id ? (b.accommodation_id || b.vehicle_id).substring(0,8) : 'N/A'}
+                        ID: {b.accommodation_id || b.vehicle_id || b.house_id ? (b.accommodation_id || b.vehicle_id || b.house_id).substring(0,8) : 'N/A'}
                       </span>
                     </div>
                   </td>
@@ -98,10 +104,16 @@ const ClientBookings = () => {
                       b.booking_status === 'cancelled' ? 'bg-red-50 text-red-600' :
                       'bg-gray-100 text-gray-600'
                     }`}>
-                      {b.booking_status === 'pending' && <Clock size={12} />}
-                      {b.booking_status === 'completed' && <CheckCircle2 size={12} />}
-                      {b.booking_status === 'cancelled' && <XCircle size={12} />}
                       {b.booking_status}
+                    </span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 w-fit ${
+                      b.payment_status === 'pending' ? 'bg-orange-50 text-orange-600' :
+                      b.payment_status === 'paid' ? 'bg-green-50 text-green-600' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {b.payment_status || 'N/A'}
                     </span>
                   </td>
                   <td className="px-8 py-6">
@@ -115,7 +127,14 @@ const ClientBookings = () => {
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex justify-center">
-                      {b.booking_status === 'pending' ? (
+                      {b.booking_status === 'completed' && b.payment_status === 'paid' ? (
+                        <button 
+                          onClick={() => handleDownloadReceipt(b)} 
+                          className="bg-blue-500 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-sm active:scale-95 flex items-center gap-2"
+                        >
+                          <Download size={14} /> Receipt
+                        </button>
+                      ) : b.booking_status === 'pending' ? (
                         <button 
                           onClick={() => handleCancel(b.id)} 
                           className="bg-red-50 text-red-600 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95"
@@ -133,7 +152,7 @@ const ClientBookings = () => {
               ))}
               {bookings.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-8 py-20 text-center">
+                  <td colSpan={7} className="px-8 py-20 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-40">
                       <BookOpen size={48} />
                       <p className="text-lg font-bold text-text-light italic tracking-tight">You have no bookings yet.</p>

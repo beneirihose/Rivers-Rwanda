@@ -10,6 +10,8 @@ import AccommodationsList from '../pages/Accommodations/AccommodationsList';
 import AccommodationDetailPage from '../pages/Accommodations/AccommodationDetailPage';
 import CarsList from '../pages/Cars/CarsList';
 import CarDetailPage from '../pages/Cars/CarDetailPage';
+import HousesList from '../pages/Houses/HousesList';
+import HouseDetailPage from '../pages/Houses/HouseDetailPage';
 import Contact from '../pages/Contact/Contact';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
@@ -23,6 +25,7 @@ import AdminDashboard from '../pages/AdminDashboard/AdminDashboard';
 import UserManagement from '../pages/AdminDashboard/UserManagement';
 import AccommodationManagement from '../pages/AdminDashboard/AccommodationManagement';
 import VehicleManagement from '../pages/AdminDashboard/VehicleManagement';
+import HouseManagement from '../pages/AdminDashboard/HouseManagement';
 import BookingManagement from '../pages/AdminDashboard/BookingManagement';
 import AgentManagement from '../pages/AdminDashboard/AgentManagement';
 import InquiryManagement from '../pages/AdminDashboard/InquiryManagement';
@@ -68,6 +71,8 @@ const AppContent = () => {
           <Route path="/accommodations/:id" element={<AccommodationDetailPage />} />
           <Route path="/cars" element={<CarsList />} />
           <Route path="/cars/:id" element={<CarDetailPage />} />
+          <Route path="/houses" element={<HousesList />} />
+          <Route path="/houses/:id" element={<HouseDetailPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -108,6 +113,7 @@ const AppContent = () => {
                   <Route path="users" element={<UserManagement />} />
                   <Route path="accommodations" element={<AccommodationManagement />} />
                   <Route path="vehicles" element={<VehicleManagement />} />
+                  <Route path="houses" element={<HouseManagement />} />
                   <Route path="bookings" element={<BookingManagement />} />
                   <Route path="agents" element={<AgentManagement />} />
                   <Route path="inquiries" element={<InquiryManagement />} />

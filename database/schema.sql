@@ -119,15 +119,48 @@ CREATE TABLE vehicles (
     INDEX idx_make_model (make, model)
 ) ENGINE=InnoDB;
 
--- 6. BOOKINGS TABLE
+-- 6. HOUSES TABLE
+CREATE TABLE houses (
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    size VARCHAR(100),
+    total_rooms INT,
+    bedrooms INT,
+    bathrooms INT,
+    has_parking BOOLEAN DEFAULT FALSE,
+    has_garden BOOLEAN DEFAULT FALSE,
+    has_wifi BOOLEAN DEFAULT FALSE,
+    amenities JSON,
+    images JSON,
+    province VARCHAR(100),
+    district VARCHAR(100),
+    sector VARCHAR(100),
+    cell VARCHAR(100),
+    village VARCHAR(100),
+    full_address TEXT,
+    monthly_rent_price DECIMAL(10,2),
+    purchase_price DECIMAL(10,2),
+    currency ENUM('RWF', 'USD') DEFAULT 'RWF',
+    status ENUM('available', 'under maintenance', 'rented', 'purchased') DEFAULT 'available',
+    contact_info JSON,
+    featured BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_status (status),
+    INDEX idx_province_district (province, district)
+) ENGINE=InnoDB;
+
+-- 7. BOOKINGS TABLE
 CREATE TABLE bookings (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    booking_type ENUM('accommodation', 'vehicle_rent', 'vehicle_purchase') NOT NULL,
+    booking_type ENUM('accommodation', 'vehicle_rent', 'vehicle_purchase', 'house_rent', 'house_purchase') NOT NULL,
     booking_reference VARCHAR(20) UNIQUE NOT NULL,
     client_id CHAR(36) NOT NULL,
     agent_id CHAR(36),
     accommodation_id CHAR(36),
     vehicle_id CHAR(36),
+    house_id CHAR(36),
     start_date DATE,
     end_date DATE,
     total_amount DECIMAL(10,2) NOT NULL,
@@ -139,13 +172,14 @@ CREATE TABLE bookings (
     FOREIGN KEY (agent_id) REFERENCES agents(id),
     FOREIGN KEY (accommodation_id) REFERENCES accommodations(id),
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
+    FOREIGN KEY (house_id) REFERENCES houses(id),
     INDEX idx_client (client_id),
     INDEX idx_agent (agent_id),
     INDEX idx_status (booking_status),
     INDEX idx_reference (booking_reference)
 ) ENGINE=InnoDB;
 
--- 7. PAYMENTS TABLE
+-- 8. PAYMENTS TABLE
 CREATE TABLE payments (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     booking_id CHAR(36) NOT NULL,
@@ -161,7 +195,7 @@ CREATE TABLE payments (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 8. COMMISSIONS TABLE
+-- 9. COMMISSIONS TABLE
 CREATE TABLE commissions (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     agent_id CHAR(36) NOT NULL,
@@ -176,7 +210,7 @@ CREATE TABLE commissions (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 9. CONTACT_INQUIRIES TABLE
+-- 10. CONTACT_INQUIRIES TABLE
 CREATE TABLE contact_inquiries (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     full_name VARCHAR(255) NOT NULL,
@@ -189,22 +223,24 @@ CREATE TABLE contact_inquiries (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 10. REVIEWS TABLE
+-- 11. REVIEWS TABLE
 CREATE TABLE reviews (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     client_id CHAR(36) NOT NULL,
     accommodation_id CHAR(36),
     vehicle_id CHAR(36),
+    house_id CHAR(36),
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
     FOREIGN KEY (accommodation_id) REFERENCES accommodations(id) ON DELETE CASCADE,
-    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
+    FOREIGN KEY (house_id) REFERENCES houses(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 11. SYSTEM_SETTINGS TABLE
+-- 12. SYSTEM_SETTINGS TABLE
 CREATE TABLE system_settings (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     setting_key VARCHAR(100) UNIQUE NOT NULL,
@@ -213,7 +249,7 @@ CREATE TABLE system_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 12. ADMIN_PROFILES TABLE
+-- 13. ADMIN_PROFILES TABLE
 CREATE TABLE admin_profiles (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     user_id CHAR(36) UNIQUE NOT NULL,

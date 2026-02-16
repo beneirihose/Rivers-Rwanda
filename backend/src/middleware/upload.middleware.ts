@@ -50,8 +50,29 @@ export const uploadVehicleImages = multer({
   limits: { fileSize: 1024 * 1024 * 5 }
 }).array('images', 5);
 
+export const uploadHouseImages = multer({
+  storage: createStorage('houses'),
+  fileFilter: fileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 }
+}).array('images', 10);
+
 export const uploadProfileImage = multer({
   storage: createStorage('profiles'),
   fileFilter: fileFilter,
   limits: { fileSize: 1024 * 1024 * 2 } // 2MB for profile pictures
 }).single('profile_image');
+
+export const uploadPaymentProof = multer({
+  storage: createStorage('payment-proofs'),
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|pdf/;
+    const mimetype = allowedTypes.test(file.mimetype);
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Invalid file type. Only JPG, PNG, and PDF are allowed.'));
+  },
+  limits: { fileSize: 1024 * 1024 * 5 } // 5MB
+}).single('payment_proof');

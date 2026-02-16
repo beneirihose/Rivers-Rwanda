@@ -10,7 +10,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [profile, setProfile] = useState<any>(null);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token');
@@ -65,6 +65,7 @@ const Header = () => {
     { name: 'About', path: '/about' },
     { name: 'Accommodations', path: '/accommodations' },
     { name: 'Cars', path: '/cars' },
+    { name: 'Houses', path: '/houses' },
     { name: 'Contact', path: '/contact' },
   ];
 

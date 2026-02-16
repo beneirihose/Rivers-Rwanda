@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as BookingModel from '../models/Booking.model';
+import * as PaymentModel from '../models/Payment.model';
 import { getClientIdByUserId } from '../models/User.model';
 import { getAgentId } from '../utils/agent.utils';
 
@@ -33,6 +34,15 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
     const bookingData = { ...req.body, client_id: finalClientId, agent_id: agentId };
 
     const newBooking = await BookingModel.createBooking(bookingData);
+
+    if (req.file) {
+      await PaymentModel.createPayment({
+        booking_id: newBooking.id,
+        amount: newBooking.total_amount,
+        payment_method: req.body.payment_method,
+        payment_proof_path: req.file.path
+      });
+    }
     
     res.status(201).json({ 
       success: true, 

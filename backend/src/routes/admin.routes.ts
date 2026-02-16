@@ -5,6 +5,7 @@ import {
   rejectAgent, 
   getAllBookings, 
   updateBookingStatus, 
+  verifyPayment, 
   getStats,
   getAllUsers,
   createAdminUser,
@@ -34,5 +35,6 @@ router.patch('/agents/:id/reject', rejectAgent);
 // Booking Management
 router.get('/bookings', getAllBookings);
 router.patch('/bookings/:id/status', updateBookingStatus);
+router.patch('/payments/:id/verify', verifyPayment);
 
 export default router;
