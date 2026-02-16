@@ -4,6 +4,14 @@ import * as PaymentModel from '../models/Payment.model';
 import { getClientIdByUserId } from '../models/User.model';
 import { getAgentId } from '../utils/agent.utils';
 
+// --- THE DEFINITIVE FIX FOR PAYMENT PROOF PATHS ---
+const getRelativePath = (fullPath: string): string => {
+    const uploadsDir = 'uploads';
+    const uploadsIndex = fullPath.indexOf(uploadsDir);
+    const relativePath = fullPath.substring(uploadsIndex);
+    return '/' + relativePath.replace(/\\/g, '/');
+}
+
 export const createBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.userId;
@@ -35,12 +43,13 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
 
     const newBooking = await BookingModel.createBooking(bookingData);
 
+    // Create payment record if proof is uploaded
     if (req.file) {
       await PaymentModel.createPayment({
         booking_id: newBooking.id,
         amount: newBooking.total_amount,
         payment_method: req.body.payment_method,
-        payment_proof_path: req.file.path
+        payment_proof_path: getRelativePath(req.file.path) // Use the corrected relative path
       });
     }
     

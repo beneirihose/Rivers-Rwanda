@@ -29,8 +29,8 @@ export const createBooking = async (data: any): Promise<Booking> => {
   const reference = generateReference();
   const bookingId = uuidv4();
   const sql = `
-    INSERT INTO bookings (id, booking_type, booking_reference, client_id, agent_id, accommodation_id, vehicle_id, house_id, total_amount, booking_status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+    INSERT INTO bookings (id, booking_type, booking_reference, client_id, agent_id, accommodation_id, vehicle_id, house_id, total_amount, booking_status, payment_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')
   `;
   await query(sql, [
     bookingId,
@@ -52,6 +52,7 @@ export const getBookingsByClientId = async (clientId: string): Promise<Booking[]
   const sql = `
     SELECT 
       b.*,
+      p.payment_proof_path,
       p.status as payment_status
     FROM bookings as b
     LEFT JOIN payments as p ON b.id = p.booking_id
