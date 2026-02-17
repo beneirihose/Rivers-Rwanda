@@ -3,8 +3,8 @@ import * as BookingModel from '../models/Booking.model';
 import * as PaymentModel from '../models/Payment.model';
 import { getClientIdByUserId } from '../models/User.model';
 import { getAgentId } from '../utils/agent.utils';
+import QRCode from 'qrcode';
 
-// --- THE DEFINITIVE FIX FOR PAYMENT PROOF PATHS ---
 const getRelativePath = (fullPath: string): string => {
     const uploadsDir = 'uploads';
     const uploadsIndex = fullPath.indexOf(uploadsDir);
@@ -15,50 +15,27 @@ const getRelativePath = (fullPath: string): string => {
 export const createBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.userId;
-    const userRole = req.user?.role;
+    if (!userId) return res.status(401).json({ success: false, message: 'User not authenticated' });
 
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'User not authenticated' });
-    }
+    const clientId = await getClientIdByUserId(userId);
+    if (!clientId) return res.status(404).json({ success: false, message: 'Client profile not found.' });
 
-    let finalClientId: string | null = null;
-    let agentId: string | null = null;
-
-    if (userRole === 'client') {
-      finalClientId = await getClientIdByUserId(userId);
-    } else if (userRole === 'agent') {
-      const { clientIdForBooking } = req.body;
-      if (!clientIdForBooking) {
-        return res.status(400).json({ success: false, message: 'Client ID is required for agent bookings.' });
-      }
-      finalClientId = clientIdForBooking;
-      agentId = await getAgentId(userId);
-    }
-
-    if (!finalClientId) {
-      return res.status(404).json({ success: false, message: 'Could not determine a valid client for this booking.' });
-    }
-
-    const bookingData = { ...req.body, client_id: finalClientId, agent_id: agentId };
-
+    const bookingData = { ...req.body, client_id: clientId };
     const newBooking = await BookingModel.createBooking(bookingData);
 
-    // Create payment record if proof is uploaded
     if (req.file) {
       await PaymentModel.createPayment({
         booking_id: newBooking.id,
         amount: newBooking.total_amount,
         payment_method: req.body.payment_method,
-        payment_proof_path: getRelativePath(req.file.path) // Use the corrected relative path
+        payment_proof_path: getRelativePath(req.file.path)
       });
     }
     
     res.status(201).json({ 
       success: true, 
       message: 'Booking created successfully!', 
-      data: {
-        bookingReference: newBooking.booking_reference
-      }
+      data: { bookingReference: newBooking.booking_reference }
     });
 
   } catch (error) {
@@ -66,17 +43,43 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+export const getInvoiceData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const details = await BookingModel.getBookingDetailsForInvoice(id);
+        if (!details) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+
+        const qrCodeData = JSON.stringify({
+            client: `${details.client_first_name} ${details.client_last_name}`,
+            phone: details.client_phone,
+            email: details.client_email,
+            paymentMethod: details.payment_method,
+            bookingDate: details.created_at,
+            bookingRef: details.booking_reference
+        });
+
+        const qrCodeImage = await QRCode.toDataURL(qrCodeData);
+
+        res.status(200).json({ 
+            success: true, 
+            data: { ...details, qrCodeImage }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 export const getMyBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.userId;
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'User not authenticated' });
-    }
+    if (!userId) return res.status(401).json({ success: false, message: 'User not authenticated' });
 
     const clientId = await getClientIdByUserId(userId);
-    if (!clientId) {
-        return res.status(404).json({ success: false, message: 'Client profile not found' });
-    }
+    if (!clientId) return res.status(404).json({ success: false, message: 'Client profile not found' });
 
     const bookings = await BookingModel.getBookingsByClientId(clientId);
     res.status(200).json({ success: true, data: bookings });

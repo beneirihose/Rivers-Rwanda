@@ -1,15 +1,23 @@
 import { Router } from 'express';
-import { createBooking, getMyBookings, cancelBooking } from '../controllers/booking.controller';
+import { createBooking, getMyBookings, cancelBooking, getInvoiceData } from '../controllers/booking.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { uploadPaymentProof } from '../middleware/upload.middleware';
 
 const router = Router();
 
-// Allow both clients and agents to create bookings
-router.post('/', authenticate, authorize('client', 'agent'), uploadPaymentProof, createBooking);
+// All routes here are authenticated
+router.use(authenticate);
 
-// These routes should likely remain client-specific
-router.get('/my', authenticate, authorize('client'), getMyBookings);
-router.patch('/:id/cancel', authenticate, authorize('client'), cancelBooking);
+// Create a new booking (for clients and agents)
+router.post('/', authorize('client', 'agent'), uploadPaymentProof, createBooking);
+
+// Get bookings for the currently logged-in client
+router.get('/my', authorize('client'), getMyBookings);
+
+// Get invoice data for a specific booking
+router.get('/:id/invoice', getInvoiceData);
+
+// Cancel a booking
+router.patch('/:id/cancel', authorize('client'), cancelBooking);
 
 export default router;

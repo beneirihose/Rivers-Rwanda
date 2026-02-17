@@ -2,6 +2,51 @@ import { query } from '../database/connection';
 import { RowDataPacket } from 'mysql2';
 import { v4 as uuidv4 } from 'uuid';
 
+// ... (getBookingDetailsForInvoice and other interfaces remain here) ...
+
+export const getBookingsByClientId = async (clientId: string): Promise<Booking[]> => {
+  const sql = `
+    SELECT 
+      b.*, -- Select all from bookings, including the correct b.payment_status
+      p.payment_proof_path
+    FROM bookings as b
+    LEFT JOIN payments as p ON b.id = p.booking_id
+    WHERE b.client_id = ? 
+    ORDER BY b.created_at DESC
+  `;
+  return await query<Booking[]>(sql, [clientId]);
+};
+
+// --- The rest of the file remains unchanged ---
+
+export const getBookingDetailsForInvoice = async (bookingId: string): Promise<any> => {
+    const sql = `
+        SELECT
+            b.*,
+            c.first_name as client_first_name,
+            c.last_name as client_last_name,
+            c.phone_number as client_phone,
+            u.email as client_email,
+            p.payment_method,
+            p.status as payment_status_from_payment_table, -- alias to avoid conflict
+            h.title as house_title,
+            h.full_address as house_address,
+            v.make as vehicle_make,
+            v.model as vehicle_model,
+            acc.name as accommodation_name
+        FROM bookings as b
+        LEFT JOIN clients as c ON b.client_id = c.id
+        LEFT JOIN users as u ON c.user_id = u.id
+        LEFT JOIN payments as p ON b.id = p.booking_id
+        LEFT JOIN houses as h ON b.house_id = h.id
+        LEFT JOIN vehicles as v ON b.vehicle_id = v.id
+        LEFT JOIN accommodations as acc ON b.accommodation_id = acc.id
+        WHERE b.id = ?
+    `;
+    const [details] = await query<any[]>(sql, [bookingId]);
+    return details;
+};
+
 export interface Booking extends RowDataPacket {
   id: string;
   booking_type: 'accommodation' | 'vehicle_rent' | 'vehicle_purchase' | 'house_rent' | 'house_purchase';
@@ -13,23 +58,19 @@ export interface Booking extends RowDataPacket {
   house_id?: string;
   total_amount: number;
   booking_status: 'pending' | 'approved' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
+  payment_status?: 'pending' | 'paid' | 'refunded';
   created_at: Date;
   payment_id?: string;
   payment_method?: string;
   payment_proof_path?: string;
-  payment_status?: 'pending' | 'completed' | 'failed' | 'refunded';
   verified_at?: Date;
   client_name?: string;
   client_phone?: string;
   agent_name?: string;
 }
 
-const generateReference = () => {
-  return 'RR' + Math.random().toString(36).substr(2, 9).toUpperCase();
-};
-
 export const createBooking = async (data: any): Promise<Booking> => {
-  const reference = generateReference();
+  const reference = 'RR' + Math.random().toString(36).substr(2, 9).toUpperCase();
   const bookingId = uuidv4();
   const sql = `
     INSERT INTO bookings (id, booking_type, booking_reference, client_id, agent_id, accommodation_id, vehicle_id, house_id, total_amount, booking_status, payment_status)
@@ -51,20 +92,6 @@ export const createBooking = async (data: any): Promise<Booking> => {
   return newBooking;
 };
 
-export const getBookingsByClientId = async (clientId: string): Promise<Booking[]> => {
-  const sql = `
-    SELECT 
-      b.*,
-      p.payment_proof_path,
-      p.status as payment_status
-    FROM bookings as b
-    LEFT JOIN payments as p ON b.id = p.booking_id
-    WHERE b.client_id = ? 
-    ORDER BY b.created_at DESC
-  `;
-  return await query<Booking[]>(sql, [clientId]);
-};
-
 export const getAllBookings = async (): Promise<Booking[]> => {
   const sql = `
     SELECT 
@@ -72,7 +99,7 @@ export const getAllBookings = async (): Promise<Booking[]> => {
       p.id as payment_id,
       p.payment_method,
       p.payment_proof_path,
-      p.status as payment_status,
+      p.status as payment_status_from_payment_table,
       p.verified_at,
       CONCAT(c.first_name, ' ', c.last_name) as client_name,
       c.phone_number as client_phone,
@@ -95,4 +122,3 @@ export const deleteBookingById = async (id: string): Promise<void> => {
   const sql = 'DELETE FROM bookings WHERE id = ?';
   await query(sql, [id]);
 };
-

@@ -6,34 +6,29 @@ import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Banknote, Smartphone } from 'lucide-react';
-import SuccessModal from '../common/SuccessModal'; // Import the new modal
+import SuccessModal from '../common/SuccessModal';
 
+// --- Schema for the form ---
 const schema = z.object({
   fullName: z.string().min(3, 'Full name is required'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Invalid phone number'),
-  rental_duration: z.preprocess(
-    (val) => (val ? parseInt(String(val), 10) : undefined),
-    z.number().min(3, 'Minimum rental is 3 months').optional()
+  duration: z.preprocess(
+    (val) => (val ? parseInt(String(val), 10) : 1),
+    z.number().min(1, 'Duration must be at least 1').optional()
   ),
   payment_method: z.enum(['bank_transfer', 'mobile_money']),
   payment_proof: z.any().refine(files => files?.length > 0, 'Payment proof is required.'),
 });
 
+// --- Statically defined payment details ---
 const paymentDetails = {
-  bank: {
-    name: 'Bank of Kigali',
-    accountNumber: '0012-3456-7890-1112',
-    accountName: 'Rivers Rwanda Ltd.',
-  },
-  momo: {
-    number: '574623',
-    name: 'Esron',
-    dialCode: '*182*8*1*574623#'
-  }
+  bank: { name: 'Bank of Kigali', accountNumber: '0012-3456-7890-1112', accountName: 'Rivers Rwanda Ltd.' },
+  momo: { number: '574623', name: 'Esron', dialCode: '*182*8*1*574623#' }
 };
 
-const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehicle' }) => {
+// --- Universal Booking Form Component ---
+const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehicle' | 'accommodation' }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -41,14 +36,43 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm({ 
     resolver: zodResolver(schema),
-    defaultValues: { payment_method: 'bank_transfer' }
+    defaultValues: { payment_method: 'bank_transfer', duration: 1 }
   });
 
   const paymentMethod = watch('payment_method');
-  const rentalDuration = watch('rental_duration');
+  const duration = watch('duration');
 
-  const price = item.monthly_rent_price || item.purchase_price || item.daily_rate || item.sale_price;
-  const totalAmount = item.monthly_rent_price && rentalDuration ? price * rentalDuration : price;
+  // --- UNIVERSAL PRICE & DURATION LOGIC ---
+  let price_per_unit = 0;
+  let unit_label = '';
+  let duration_label = 'Number of Nights';
+  let show_duration = true;
+
+  if (itemType === 'accommodation') {
+    price_per_unit = item.price_per_night || item.price_per_event || 0;
+    unit_label = item.price_per_night ? '/ night' : (item.price_per_event ? ' for the event' : '');
+    duration_label = item.price_per_night ? 'Number of Nights' : 'Number of Events';
+  } else if (itemType === 'house') {
+    if (item.purchase_price) {
+        price_per_unit = item.purchase_price;
+        show_duration = false; // No duration for purchases
+    } else {
+        price_per_unit = item.monthly_rent_price || 0;
+        unit_label = '/ month';
+        duration_label = 'Rental Duration (Months)';
+    }
+  } else if (itemType === 'vehicle') {
+    if (item.sale_price) {
+        price_per_unit = item.sale_price;
+        show_duration = false; // No duration for purchases
+    } else {
+        price_per_unit = item.daily_rate || 0;
+        unit_label = '/ day';
+        duration_label = 'Number of Days';
+    }
+  }
+  
+  const totalAmount = show_duration ? price_per_unit * (duration || 1) : price_per_unit;
 
   const onSubmit = async (data: any) => {
     setLoading(true);
@@ -62,23 +86,27 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
       }
     });
     
-    let bookingType, itemId;
+    // --- UNIVERSAL PAYLOAD LOGIC ---
+    let bookingType, itemIdKey;
     if (itemType === 'house') {
       bookingType = item.monthly_rent_price ? 'house_rent' : 'house_purchase';
-      itemId = 'house_id';
-    } else {
+      itemIdKey = 'house_id';
+    } else if (itemType === 'vehicle') {
       bookingType = item.purpose === 'rent' ? 'vehicle_rent' : 'vehicle_purchase';
-      itemId = 'vehicle_id';
+      itemIdKey = 'vehicle_id';
+    } else { // Accommodation
+      bookingType = 'accommodation';
+      itemIdKey = 'accommodation_id';
     }
 
     formData.append('booking_type', bookingType);
-    formData.append(itemId, item.id);
+    formData.append(itemIdKey, item.id);
     formData.append('total_amount', totalAmount);
 
     try {
       const response = await api.post('/bookings', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setBookingRef(response.data.data.bookingReference); // Save reference
-      setModalOpen(true); // Open the modal
+      setBookingRef(response.data.data.bookingReference);
+      setModalOpen(true);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Booking failed');
     } finally {
@@ -88,7 +116,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
   
   const handleModalClose = () => {
     setModalOpen(false);
-    navigate('/client/bookings'); // Navigate on close
+    navigate('/client/bookings');
   }
 
   const inputStyles = "w-full p-3 bg-white/5 border-2 border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-accent-orange focus:bg-white/10 outline-none transition-all";
@@ -96,22 +124,15 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
   return (
     <>
-      <SuccessModal 
-        isOpen={modalOpen}
-        onClose={handleModalClose}
-        title="Success!"
-        message="Booking created successfully!"
-        reference={bookingRef}
-      />
-
+      <SuccessModal isOpen={modalOpen} onClose={handleModalClose} title="Success!" message="Booking request received!" reference={bookingRef} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="my-6 p-4 bg-black/20 rounded-xl text-center">
           <p className="text-xs font-black text-gray-300 uppercase tracking-widest mb-1">
-            {item.monthly_rent_price ? (rentalDuration ? 'Total Amount Due' : 'Monthly Rent') : 'Purchase Price'}
+            {show_duration ? 'Total Amount' : 'Purchase Price'}
           </p>
           <p className="text-3xl font-black text-white tracking-tighter">
             Rwf {totalAmount?.toLocaleString()}
-            {item.monthly_rent_price && rentalDuration > 0 && <span className="text-base font-bold normal-case text-gray-300/80 ml-1"> for {rentalDuration} months</span>}
+            {show_duration && <span className="text-base font-bold normal-case text-gray-300/80 ml-1"> for {duration} {unit_label.replace('/','').trim()}(s)</span>}
           </p>
         </div>
 
@@ -130,10 +151,11 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
           {errors.phone && <p className={errorStyles}>{errors.phone.message as string}</p>}
         </div>
 
-        {itemType === 'house' && item.monthly_rent_price && (
+        {show_duration && (
           <div>
-              <input {...register('rental_duration')} type="number" placeholder="Rental Duration (months, 3 min)" className={inputStyles} />
-              {errors.rental_duration && <p className={errorStyles}>{errors.rental_duration.message as string}</p>}
+            <label className="text-xs font-bold text-gray-300 uppercase ml-2">{duration_label}</label>
+            <input {...register('duration')} type="number" placeholder={duration_label} className={`${inputStyles} mt-1`} />
+            {errors.duration && <p className={errorStyles}>{errors.duration.message as string}</p>}
           </div>
         )}
 
@@ -160,14 +182,14 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
           {paymentMethod === 'mobile_money' && (
             <div className="text-sm space-y-1 text-gray-200">
               <p><strong>Receiver:</strong> {paymentDetails.momo.name}</p>
-              <p><strong>Dial:</strong> <span className="font-mono bg-black/30 p-1 rounded">{paymentDetails.momo.dialCode.replace('574623', `<strong class=\"text-accent-orange\">${paymentDetails.momo.number}</strong>`)}</span></p>
-              <p className="text-xs mt-2 text-gray-400">Replace the amount in the dial code and follow the prompts.</p>
+              <p><strong>Code:</strong> <span className="font-mono bg-black/30 p-1 rounded">{paymentDetails.momo.number}</span></p>
+              <p className="text-xs mt-2 text-gray-400">Use this code in your payment app or dial-in service.</p>
             </div>
           )}
         </div>
         
         <div>
-          <label className="text-xs font-bold text-gray-300 uppercase ml-2">Upload Payment Proof (Screenshot/Slip)</label>
+          <label className="text-xs font-bold text-gray-300 uppercase ml-2">Upload Payment Proof</label>
           <input {...register('payment_proof')} type="file" accept=".jpg,.jpeg,.png,.pdf" className={`${inputStyles} p-2 mt-1`} />
           {errors.payment_proof && <p className={errorStyles}>{errors.payment_proof.message as string}</p>}
         </div>
