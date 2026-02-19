@@ -1,10 +1,16 @@
 import { Router } from 'express';
-import { registerClient, registerAgent, login } from '../controllers/auth.controller';
+import { register, login, verifyEmail, forgotPassword, resetPassword, resendOtp } from '../controllers/auth.controller';
 
 const router = Router();
 
-router.post('/register/client', registerClient);
-router.post('/register/agent', registerAgent);
+// Public routes
+router.post('/register', register);
 router.post('/login', login);
+router.post('/verify-email', verifyEmail);
+router.post('/resend-otp', resendOtp);
+
+// Password Reset Routes
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 export default router;

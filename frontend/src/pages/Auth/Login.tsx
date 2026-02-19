@@ -27,7 +27,12 @@ const Login = () => {
       else navigate('/');
       
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      if (error.response?.data?.needsVerification) {
+        toast.error(error.response.data.message);
+        navigate(`/verify-email?userId=${error.response.data.userId}`);
+      } else {
+        toast.error(error.response?.data?.message || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -103,9 +108,9 @@ const Login = () => {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-bold text-accent-orange hover:text-opacity-80">
+              <Link to="/forgot-password" className="font-bold text-accent-orange hover:text-opacity-80">
                 Forgot your password?
-              </a>
+              </Link>
             </div>
           </div>
 

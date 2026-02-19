@@ -15,6 +15,9 @@ import HouseDetailPage from '../pages/Houses/HouseDetailPage';
 import Contact from '../pages/Contact/Contact';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
+import VerifyEmail from '../pages/Auth/VerifyEmail';
+import ForgotPassword from '../pages/Auth/ForgotPassword';
+import ResetPassword from '../pages/Auth/ResetPassword';
 
 // Dashboard Pages
 import ClientDashboard from '../pages/ClientDashboard/ClientDashboard';
@@ -76,6 +79,9 @@ const AppContent = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Client Routes */}
           <Route path="/client/*" element={

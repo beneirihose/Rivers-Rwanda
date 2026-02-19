@@ -12,10 +12,6 @@ CREATE TABLE users (
     role ENUM('client', 'agent', 'admin') NOT NULL,
     status ENUM('active', 'pending', 'suspended', 'deleted') DEFAULT 'pending',
     email_verified BOOLEAN DEFAULT FALSE,
-    email_verification_token VARCHAR(255),
-    password_reset_token VARCHAR(255),
-    password_reset_expires TIMESTAMP NULL,
-    last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email (email),
@@ -23,17 +19,27 @@ CREATE TABLE users (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 2. CLIENTS TABLE
+-- 2. OTPS TABLE (One-Time Passwords)
+CREATE TABLE otps (
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    user_id CHAR(36) NOT NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    purpose ENUM('email_verification', 'password_reset') NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id_purpose (user_id, purpose)
+) ENGINE=InnoDB;
+
+-- 3. CLIENTS TABLE
 CREATE TABLE clients (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     user_id CHAR(36) UNIQUE NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(20),
+    phone_number VARCHAR(20) UNIQUE,
     country VARCHAR(100) DEFAULT 'Rwanda',
-    city VARCHAR(100),
-    district VARCHAR(100),
-    street_address TEXT,
     profile_image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -41,33 +47,27 @@ CREATE TABLE clients (
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB;
 
--- 3. AGENTS TABLE
+-- 4. AGENTS TABLE
 CREATE TABLE agents (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     user_id CHAR(36) UNIQUE NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(20) NOT NULL,
+    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    national_id VARCHAR(16) UNIQUE, -- Added for Agent Verification
     profile_image VARCHAR(255),
     business_name VARCHAR(255),
-    business_type ENUM('individual', 'company') DEFAULT 'individual',
-    tax_id VARCHAR(50),
-    bank_name VARCHAR(100),
-    bank_account_number VARCHAR(50),
-    bank_account_name VARCHAR(255),
-    mobile_money_number VARCHAR(20),
-    referral_code VARCHAR(20) UNIQUE,
     status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending',
     commission_rate DECIMAL(5,2) DEFAULT 5.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_user_id (user_id),
-    INDEX idx_status (status),
-    INDEX idx_referral_code (referral_code)
+    INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB;
 
--- 4. ACCOMMODATIONS TABLE
+-- ... (rest of the tables: accommodations, vehicles, houses, bookings, etc. remain unchanged) ...
+
+-- 5. ACCOMMODATIONS TABLE
 CREATE TABLE accommodations (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     type ENUM('apartment', 'hotel_room', 'event_hall') NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE accommodations (
     INDEX idx_city (city)
 ) ENGINE=InnoDB;
 
--- 5. VEHICLES TABLE
+-- 6. VEHICLES TABLE
 CREATE TABLE vehicles (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     purpose ENUM('rent', 'buy', 'both') NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE vehicles (
     INDEX idx_make_model (make, model)
 ) ENGINE=InnoDB;
 
--- 6. HOUSES TABLE
+-- 7. HOUSES TABLE
 CREATE TABLE houses (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     title VARCHAR(255) NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE houses (
     INDEX idx_province_district (province, district)
 ) ENGINE=InnoDB;
 
--- 7. BOOKINGS TABLE
+-- 8. BOOKINGS TABLE
 CREATE TABLE bookings (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     booking_type ENUM('accommodation', 'vehicle_rent', 'vehicle_purchase', 'house_rent', 'house_purchase') NOT NULL,
@@ -165,7 +165,7 @@ CREATE TABLE bookings (
     end_date DATE,
     total_amount DECIMAL(10,2) NOT NULL,
     booking_status ENUM('pending', 'approved', 'confirmed', 'completed', 'cancelled', 'rejected') DEFAULT 'pending',
-    payment_status ENUM('pending', 'partial', 'paid', 'refunded') DEFAULT 'pending',
+    payment_status ENUM('pending', 'paid', 'refunded') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id),
@@ -179,7 +179,7 @@ CREATE TABLE bookings (
     INDEX idx_reference (booking_reference)
 ) ENGINE=InnoDB;
 
--- 8. PAYMENTS TABLE
+-- 9. PAYMENTS TABLE
 CREATE TABLE payments (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     booking_id CHAR(36) NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE payments (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 9. COMMISSIONS TABLE
+-- 10. COMMISSIONS TABLE
 CREATE TABLE commissions (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     agent_id CHAR(36) NOT NULL,
@@ -210,7 +210,7 @@ CREATE TABLE commissions (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 10. CONTACT_INQUIRIES TABLE
+-- 11. CONTACT_INQUIRIES TABLE
 CREATE TABLE contact_inquiries (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     full_name VARCHAR(255) NOT NULL,
@@ -223,7 +223,7 @@ CREATE TABLE contact_inquiries (
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- 11. REVIEWS TABLE
+-- 12. REVIEWS TABLE
 CREATE TABLE reviews (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     client_id CHAR(36) NOT NULL,
@@ -240,7 +240,7 @@ CREATE TABLE reviews (
     FOREIGN KEY (house_id) REFERENCES houses(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 12. SYSTEM_SETTINGS TABLE
+-- 13. SYSTEM_SETTINGS TABLE
 CREATE TABLE system_settings (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     setting_key VARCHAR(100) UNIQUE NOT NULL,
@@ -249,7 +249,7 @@ CREATE TABLE system_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 13. ADMIN_PROFILES TABLE
+-- 14. ADMIN_PROFILES TABLE
 CREATE TABLE admin_profiles (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     user_id CHAR(36) UNIQUE NOT NULL,
@@ -261,10 +261,3 @@ CREATE TABLE admin_profiles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
--- INITIAL SEED DATA (Admin)
--- IMPORTANT: Replace 'YOUR_BCRYPT_HASH_HERE' with an actual bcrypt hash of your password.
-INSERT INTO users (id, email, password_hash, role, status, email_verified)
-VALUES ('admin-uuid-1234', 'esront21@gmail.com', 'YOUR_BCRYPT_HASH_HERE', 'admin', 'active', TRUE);
-
--- Note: UUID above is a placeholder, in real app use UUID()

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-let pool: mysql.Pool;
+export let pool: mysql.Pool;
 
 export const connectDatabase = async (): Promise<void> => {
   try {
