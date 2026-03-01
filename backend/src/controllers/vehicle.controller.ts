@@ -37,7 +37,7 @@ export const createVehicle = async (req: AuthenticatedRequest, res: Response, ne
     }
 
     let sellerId: string | null = null;
-    let initialStatus = 'pending_approval';
+    let initialStatus: string = 'available';
 
     if (userRole === 'admin') {
         sellerId = null;
@@ -65,12 +65,14 @@ export const createVehicle = async (req: AuthenticatedRequest, res: Response, ne
         if (!seller.agreed_to_commission && String(agreed_to_commission) === 'true') {
             await SellerModel.updateSeller(sellerId, { agreed_to_commission: true } as Partial<SellerModel.Seller>);
         }
+        
+        // For sellers, the status MUST be pending_approval
+        initialStatus = 'pending_approval';
     }
 
     const imagePaths: string[] = [];
-    if (req.files) {
-      const files = req.files as Express.Multer.File[];
-      files.forEach(file => {
+    if (req.files && Array.isArray(req.files)) {
+      req.files.forEach((file: any) => {
         const urlPath = `/uploads/vehicles/${path.basename(file.path)}`;
         imagePaths.push(urlPath);
       });
@@ -80,7 +82,8 @@ export const createVehicle = async (req: AuthenticatedRequest, res: Response, ne
       ...req.body,
       seller_id: sellerId,
       images: JSON.stringify(imagePaths),
-      status: initialStatus
+      status: initialStatus,
+      seating_capacity: parseInt(req.body.seating_capacity || '0', 10)
     };
 
     const newId = await VehicleModel.createVehicle(data);
@@ -99,9 +102,8 @@ export const updateVehicle = async (req: Request, res: Response, next: NextFunct
     const { id } = req.params;
     const data = { ...req.body };
 
-    if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-      const files = req.files as Express.Multer.File[];
-      const newImagePaths: string[] = files.map(file => `/uploads/vehicles/${path.basename(file.path)}`);
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      const newImagePaths: string[] = req.files.map((file: any) => `/uploads/vehicles/${path.basename(file.path)}`);
       data.images = JSON.stringify(newImagePaths);
     }
 
