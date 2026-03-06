@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, MessageCircle } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -18,9 +18,15 @@ const Footer = () => {
             <div className="flex gap-4 text-accent-orange">
               <Facebook size={18} className="cursor-pointer hover:text-white transition-colors" />
               <Twitter size={18} className="cursor-pointer hover:text-white transition-colors" />
-              <Instagram size={18} className="cursor-pointer hover:text-white transition-colors" />
-              <Linkedin size={18} className="cursor-pointer hover:text-white transition-colors" />
-              <Youtube size={18} className="cursor-pointer hover:text-white transition-colors" />
+              <a href="https://www.instagram.com/reel/DVAxu4fE4Fv/?igsh=MTdxbDBsbXMzaG1lNw==" target="_blank" rel="noopener noreferrer">
+                <Instagram size={18} className="cursor-pointer hover:text-white transition-colors" />
+              </a>
+              <a href="https://www.linkedin.com/in/rivers-rwanda-8763363b5" target="_blank" rel="noopener noreferrer">
+                <Linkedin size={18} className="cursor-pointer hover:text-white transition-colors" />
+              </a>
+              <a href="https://www.youtube.com/@riversrwanda" target="_blank" rel="noopener noreferrer">
+                <Youtube size={18} className="cursor-pointer hover:text-white transition-colors" />
+              </a>
             </div>
           </div>
 
@@ -58,11 +64,21 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={20} className="text-accent-orange shrink-0" />
-                <p className="text-gray-400 text-sm">+250 787 855 706</p>
+                <p className="text-gray-400 text-sm">+250 792659094</p>
               </div>
               <div className="flex items-center gap-3">
-                <Mail size={20} className="text-accent-orange shrink-0" />
-                <p className="text-gray-400 text-sm">info@riversrwanda.com</p>
+                <MessageCircle size={20} className="text-accent-orange shrink-0" />
+                <a href="https://wa.me/250792659094" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-accent-orange transition-colors text-sm">
+                  WhatsApp: 0792659094
+                </a>
+              </div>
+              <div className="flex items-start gap-3">
+                <Mail size={20} className="text-accent-orange shrink-0 mt-1" />
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm font-medium">info@riversrwanda.com</p>
+                  <p className="text-gray-400 text-sm font-medium">booking@riversrwanda.com</p>
+                  <p className="text-gray-400 text-xs text-gray-500">technicalsupport@riversrwanda.com</p>
+                </div>
               </div>
             </div>
           </div>

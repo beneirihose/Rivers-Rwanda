@@ -23,7 +23,7 @@ const schema = z.object({
 
 const paymentDetails = {
   bank: { name: 'Bank of Kigali', accountNumber: '0012-3456-7890-1112', accountName: 'Rivers Rwanda Ltd.' },
-  momo: { number: '574623', name: 'Esron', dialCode: '*182*8*1*574623#' }
+  momo: { number: '0792659094', name: 'Leandre Mukunzi' }
 };
 
 const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehicle' | 'accommodation' }) => {
@@ -188,7 +188,8 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
           {paymentMethod === 'mobile_money' && (
             <div className="text-sm space-y-1 text-gray-200">
               <p><strong>Receiver:</strong> {paymentDetails.momo.name}</p>
-              <p><strong>Code:</strong> <span className="font-mono bg-black/30 p-1 rounded">{paymentDetails.momo.number}</span></p>
+              <p><strong>Number:</strong> <span className="font-mono bg-black/30 p-1 rounded">{paymentDetails.momo.number}</span></p>
+              <p className="text-xs mt-2 text-gray-400">Send the total amount to this phone number and upload the confirmation screenshot below.</p>
             </div>
           )}
         </div>

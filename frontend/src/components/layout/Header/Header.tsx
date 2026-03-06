@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Phone, ChevronDown, Menu, X, LogOut, User, Globe } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api';
-import logo from '../../../assets/images/logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,7 +10,10 @@ const Header = () => {
   const [profile, setProfile] = useState<any>(null);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<string | null>(null);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
   const dropdownRef = useRef<HTMLLIElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,11 +23,16 @@ const Header = () => {
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
+
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setActiveDropdown(null);
       }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -59,6 +66,7 @@ const Header = () => {
     setIsMenuOpen(false);
     setActiveDropdown(null);
     setActiveMobileSubmenu(null);
+    setIsProfileDropdownOpen(false);
   }, [location.pathname]);
 
   const handleLogout = (silent = false) => {
@@ -66,20 +74,16 @@ const Header = () => {
     setProfile(null);
     if (!silent) navigate('/login');
   };
-  
+
   const handleDropdownToggle = (name: string) => {
     setActiveDropdown(activeDropdown === name ? null : name);
-  };
-
-  const handleMobileSubmenuToggle = (name: string) => {
-    setActiveMobileSubmenu(activeMobileSubmenu === name ? null : name);
   };
 
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
-    { 
-      name: 'Accommodations', 
+    {
+      name: 'Accommodations',
       path: '/accommodations',
       dropdown: [
         { name: 'Apartments for Rent', path: '/accommodations?type=apartment&purpose=rent' },
@@ -96,103 +100,234 @@ const Header = () => {
   const getDisplayName = () => profile?.first_name ? `${profile.first_name}`.toUpperCase() : profile?.email.split('@')[0].toUpperCase() || 'USER';
   const getProfileImage = () => profile?.profile_image ? `http://localhost:5000${profile.profile_image}` : null;
 
-  const dropdownVariants = { hidden: { opacity: 0, y: -10, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1 } };
-  const mobileMenuVariants = { hidden: { x: "-100%" }, visible: { x: 0 } };
-  const mobileLinkVariants = { hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0 } };
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: 10, scale: 0.95, transition: { duration: 0.2 } },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 20 } }
+  };
 
   return (
-    <header className={`w-full fixed top-0 z-50 transition-all duration-300 ${isScrolled || isMenuOpen ? 'bg-primary-dark' : 'bg-transparent'}`}>
-      <div className={`transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
-        <div className="container mx-auto flex justify-between items-center px-4 h-20">
-          <Link to="/"><img src={logo} alt="Rivers Rwanda" className="h-12" /></Link>
+    <header className={`w-full fixed top-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-primary-dark/90 backdrop-blur-md py-2 shadow-2xl' : 'bg-transparent py-4'}`}>
+      <div className="container mx-auto flex justify-between items-center px-6 h-16">
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:block">
-            <ul className="flex items-center gap-10">
-              {navLinks.map((link) => (
-                <li key={link.name} className="relative" ref={activeDropdown === link.name ? dropdownRef : null}>
-                  <button 
-                    onClick={() => link.dropdown ? handleDropdownToggle(link.name) : navigate(link.path!)}
-                    className={`flex items-center gap-1.5 text-sm font-black uppercase tracking-widest transition-colors duration-300 ${location.pathname.startsWith(link.path) && link.path !== '/' ? 'text-accent-orange' : 'text-white hover:text-accent-orange'}`}
-                  >
-                    {link.name}
-                    {link.dropdown && <ChevronDown size={16} className={`transition-transform ${activeDropdown === link.name ? 'rotate-180' : ''}`} />}
-                  </button>
-                  <AnimatePresence>
+        {/* Modern Text Logo */}
+        <Link to="/" className="flex flex-col group">
+          <span className="text-xl md:text-2xl font-black tracking-tighter text-accent-orange leading-none group-hover:scale-105 transition-transform duration-300">
+            RIVERS RWANDA
+          </span>
+          <span className="text-xl md:text-2xl font-black tracking-tighter text-accent-orange leading-none group-hover:scale-105 transition-transform duration-300">
+            ACCOMMODATION
+          </span>
+        </Link>
+
+        {/* Desktop Nav */}
+        <nav className="hidden lg:block">
+          <ul className="flex items-center gap-8">
+            {navLinks.map((link) => (
+              <li key={link.name} className="relative" ref={activeDropdown === link.name ? dropdownRef : null}>
+                <button
+                  onMouseEnter={() => link.dropdown && setActiveDropdown(link.name)}
+                  onClick={() => link.dropdown ? handleDropdownToggle(link.name) : navigate(link.path!)}
+                  className={`relative py-2 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 group ${location.pathname === link.path ? 'text-accent-orange' : 'text-white hover:text-accent-orange'}`}
+                >
+                  {link.name}
+                  {/* Active Indicator */}
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-accent-orange transform origin-left transition-transform duration-300 ${location.pathname === link.path ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
+                </button>
+
+                <AnimatePresence>
                   {link.dropdown && activeDropdown === link.name && (
-                    <motion.div variants={dropdownVariants} initial="hidden" animate="visible" exit="hidden" className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white rounded-xl shadow-2xl overflow-hidden border">
-                      {link.dropdown.map(dLink => (
-                        <Link key={dLink.name} to={dLink.path} className="block px-5 py-3 text-sm font-bold text-primary-dark hover:bg-gray-50 hover:text-accent-orange transition-colors">{dLink.name}</Link>
-                      ))}
+                    <motion.div
+                      onMouseLeave={() => setActiveDropdown(null)}
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      className="absolute top-full left-0 mt-4 w-56 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
+                    >
+                      <div className="p-2">
+                        {link.dropdown.map(dLink => (
+                          <Link
+                            key={dLink.name}
+                            to={dLink.path}
+                            className="flex items-center px-4 py-3 text-xs font-black uppercase tracking-widest text-primary-dark hover:bg-accent-orange hover:text-white rounded-xl transition-all duration-200"
+                          >
+                            {dLink.name}
+                          </Link>
+                        ))}
+                      </div>
                     </motion.div>
                   )}
-                  </AnimatePresence>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                </AnimatePresence>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-          <div className="flex items-center gap-2">
-            {/* Desktop Auth */}
-            <div className="hidden lg:block"> {token && profile ? (<Link to={`/${user.role}/dashboard`} className="flex items-center gap-3 pl-4 border-l border-white/10 ml-4"><div className="text-right"><p className="text-white font-bold text-xs uppercase tracking-wider">{getDisplayName()}</p><p className="text-accent-orange text-[10px] font-bold uppercase">Dashboard</p></div><img src={getProfileImage() || '/user-placeholder.png'} alt="Profile" className="w-10 h-10 rounded-full border-2 border-accent-orange object-cover" /></Link>) : (<div className="flex items-center gap-2 pl-4 border-l border-white/10 ml-4"><Link to="/login" className="text-white hover:text-accent-orange text-xs font-bold uppercase px-4 py-2">Login</Link><Link to="/register" className="bg-accent-orange text-white px-5 py-2.5 rounded-md font-black text-xs uppercase hover:bg-white hover:text-primary-dark shadow-lg">Register</Link></div>)}</div>
-            {/* Mobile Menu Button */}
-            <button onClick={() => setIsMenuOpen(true)} className="lg:hidden p-2 text-white"><Menu size={28} /></button>
+        <div className="flex items-center gap-6">
+          {/* User Auth/Profile */}
+          <div className="relative" ref={profileRef}>
+            {token && profile ? (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-1.5 pr-4 rounded-full transition-all border border-white/10"
+                >
+                  <img
+                    src={getProfileImage() || '/user-placeholder.png'}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full border-2 border-accent-orange object-cover shadow-lg"
+                  />
+                  <div className="hidden lg:block text-left">
+                    <p className="text-white font-black text-[10px] uppercase tracking-wider leading-none">{getDisplayName()}</p>
+                    <p className="text-accent-orange text-[8px] font-black uppercase mt-1">Active Account</p>
+                  </div>
+                  <ChevronDown size={14} className={`text-white/40 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isProfileDropdownOpen && (
+                    <motion.div
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      className="absolute top-full right-0 mt-4 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-50 overflow-hidden"
+                    >
+                      <div className="p-6 bg-primary-dark text-white">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Logged in as</p>
+                        <p className="font-black text-sm uppercase truncate">{profile.email}</p>
+                      </div>
+                      <div className="p-3">
+                        <Link to={`/${user.role}/dashboard`} className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-primary-dark hover:bg-gray-50 rounded-xl transition-all">
+                          <LayoutDashboard size={16} className="text-accent-orange" /> Dashboard
+                        </Link>
+                        <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-primary-dark hover:bg-gray-50 rounded-xl transition-all">
+                          <User size={16} className="text-accent-orange" /> My Profile
+                        </Link>
+                        <div className="h-px bg-gray-100 my-2 mx-4"></div>
+                        <button
+                          onClick={() => handleLogout()}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                        >
+                          <LogOut size={16} /> Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-accent-orange text-white px-8 py-3 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl shadow-accent-orange/20"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
+
+          {/* Mobile Toggle */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="lg:hidden p-2 text-white bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all"
+          >
+            <Menu size={24} />
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Modern Mobile Menu */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
-            variants={mobileMenuVariants} 
-            initial="hidden" 
-            animate="visible" 
-            exit="hidden"
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-0 h-screen w-full bg-primary-dark lg:hidden"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] lg:hidden bg-primary-dark/95 backdrop-blur-2xl"
           >
-            <div className="flex justify-between items-center p-4 h-20 border-b border-white/10">
-              <Link to="/"><img src={logo} alt="Rivers Rwanda" className="h-12" /></Link>
-              <button onClick={() => setIsMenuOpen(false)} className="p-2 text-white"><X size={28} /></button>
-            </div>
-            <div className="p-4">
-              <ul className="flex flex-col gap-2 mt-4">
-                {navLinks.map((link, index) => (
-                  <li key={link.name}>
-                    {link.dropdown ? (
-                      <div>
-                        <button onClick={() => handleMobileSubmenuToggle(link.name)} className="w-full flex justify-between items-center px-4 py-3 text-lg font-bold text-white uppercase">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center p-6 h-20 border-b border-white/5">
+                <div className="flex flex-col">
+                  <span className="text-lg font-black text-accent-orange uppercase">RIVERS RWANDA</span>
+                  <span className="text-[8px] font-bold text-accent-orange/60 tracking-[0.3em]">ACCOMMODATION</span>
+                </div>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-3 text-white bg-white/5 rounded-full hover:bg-white/10 transition-all"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto p-8">
+                <ul className="space-y-6">
+                  {navLinks.map((link) => (
+                    <li key={link.name}>
+                      {link.dropdown ? (
+                        <div className="space-y-4">
+                          <button
+                            onClick={() => setActiveMobileSubmenu(activeMobileSubmenu === link.name ? null : link.name)}
+                            className="w-full flex justify-between items-center text-2xl font-black text-white uppercase tracking-tighter"
+                          >
+                            {link.name}
+                            <ChevronDown size={24} className={`transition-transform duration-300 ${activeMobileSubmenu === link.name ? 'rotate-180 text-accent-orange' : 'text-white/20'}`} />
+                          </button>
+                          <AnimatePresence>
+                            {activeMobileSubmenu === link.name && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1}}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden space-y-3 pl-4 border-l border-accent-orange/30"
+                              >
+                                {link.dropdown.map(dLink => (
+                                  <Link
+                                    key={dLink.path}
+                                    to={dLink.path}
+                                    className="block text-sm font-bold text-gray-400 hover:text-white transition-colors py-1"
+                                  >
+                                    {dLink.name}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <Link
+                          to={link.path!}
+                          className="block text-2xl font-black text-white uppercase tracking-tighter hover:text-accent-orange transition-colors"
+                        >
                           {link.name}
-                          <ChevronDown size={20} className={`transition-transform ${activeMobileSubmenu === link.name ? 'rotate-180' : ''}`} />
-                        </button>
-                        <AnimatePresence>
-                        {activeMobileSubmenu === link.name && (
-                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1}} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pl-8">
-                            {link.dropdown.map(dLink => (
-                              <Link key={dLink.path} to={dLink.path} className="block py-2 text-gray-300 font-semibold">{dLink.name}</Link>
-                            ))}
-                          </motion.div>
-                        )}
-                        </AnimatePresence>
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <div className="p-8 border-t border-white/5 bg-white/5">
+                {!token && (
+                  <Link
+                    to="/login"
+                    className="block w-full text-center bg-accent-orange text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-2xl shadow-accent-orange/20"
+                  >
+                    Get Started
+                  </Link>
+                )}
+                {token && profile && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <img src={getProfileImage() || '/user-placeholder.png'} className="w-12 h-12 rounded-full border-2 border-accent-orange" />
+                      <div>
+                        <p className="text-white font-black uppercase text-sm">{getDisplayName()}</p>
+                        <p className="text-accent-orange font-bold text-[10px] uppercase">Member</p>
                       </div>
-                    ) : (
-                      <Link to={link.path!} className="block px-4 py-3 text-lg font-bold text-white uppercase">{link.name}</Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8 border-t border-white/10 pt-6 px-4 space-y-4">
-                {token && profile ? (
-                  <>
-                    <Link to={`/${user.role}/dashboard`} className="flex items-center gap-3"><User className="text-accent-orange"/> <span className="text-white font-bold">Dashboard</span></Link>
-                    <button onClick={() => handleLogout()} className="flex items-center gap-3 text-red-500"><LogOut /> <span className="font-bold">Logout</span></button>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/login" className="block w-full text-center bg-white/10 text-white font-bold py-3 rounded-lg">Login</Link>
-                    <Link to="/register" className="block w-full text-center bg-accent-orange text-white font-bold py-3 rounded-lg">Register</Link>
-                  </>
+                    </div>
+                    <button onClick={() => handleLogout()} className="p-4 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all">
+                      <LogOut size={20} />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
