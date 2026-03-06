@@ -26,7 +26,8 @@ export const getAllVehicles = async (filters: any): Promise<Vehicle[]> => {
       sql += ' AND status = ?';
       params.push(filters.status);
   } else {
-      sql += " AND status IN ('available', 'rented', 'sold')";
+      // Default public view: Only show available vehicles
+      sql += " AND status = 'available'";
   }
 
   if (filters.purpose) {

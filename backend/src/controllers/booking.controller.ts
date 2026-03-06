@@ -83,7 +83,7 @@ async function processConfirmedBooking(bookingId: string) {
     let sellerName = "Seller";
     let agentName = "";
 
-    const [clientInfo] = await query<any[]>('SELECT u.email, CONCAT(c.first_name, " ", c.last_name) as name FROM users u JOIN clients c ON u.id = c.user_id WHERE c.id = ?', [booking.client_id]);
+    const [clientInfo] = await query<any[]>('SELECT u.id as user_id, u.email, CONCAT(c.first_name, " ", c.last_name) as name FROM users u JOIN clients c ON u.id = c.user_id WHERE c.id = ?', [booking.client_id]);
     if (clientInfo) { emails.push(clientInfo.email); clientName = clientInfo.name; }
 
     if (sellerId) {
@@ -113,13 +113,15 @@ async function processConfirmedBooking(bookingId: string) {
         isSale: booking.booking_type.includes('purchase')
     });
 
-    // 6. In-App Notifications for Confirmation
-    await NotificationModel.createNotification({
-        user_id: clientInfo.user_id || booking.client_id, // Need to ensure we have user_id
-        title: 'Booking Confirmed!',
-        message: `Your booking for ${propertyName} (${booking.booking_reference}) has been confirmed.`,
-        type: 'booking'
-    });
+    // 6. In-App Notifications
+    if (clientInfo) {
+        await NotificationModel.createNotification({
+            user_id: clientInfo.user_id,
+            title: 'Booking Confirmed!',
+            message: `Your booking for ${propertyName} (${booking.booking_reference}) has been confirmed.`,
+            type: 'booking'
+        });
+    }
 }
 
 export const createBooking = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -153,11 +155,8 @@ export const createBooking = async (req: AuthenticatedRequest, res: Response, ne
         total_amount: parseFloat(req.body.total_amount)
     };
     
-    // Create the booking record (defaults to 'pending')
     const newBooking = await BookingModel.createBooking(bookingData);
 
-    // MANUAL FLOW FOR ALL:
-    // Every booking now requires a payment proof and manual admin confirmation.
     if (req.file) {
       await PaymentModel.createPayment({
         booking_id: newBooking.id,
@@ -167,7 +166,6 @@ export const createBooking = async (req: AuthenticatedRequest, res: Response, ne
       });
     }
 
-    // TRIGGER NOTIFICATION TO ADMINS
     await NotificationModel.notifyAdmins(
         'New Booking Request',
         `A new booking request (${newBooking.booking_reference}) has been submitted for review.`,
@@ -176,7 +174,7 @@ export const createBooking = async (req: AuthenticatedRequest, res: Response, ne
     
     res.status(201).json({ 
         success: true, 
-        message: 'Booking request submitted. Please wait for admin verification of your payment.', 
+        message: 'Booking request submitted. Please wait for admin verification.', 
         data: { 
             bookingId: newBooking.id, 
             bookingReference: newBooking.booking_reference,
@@ -206,15 +204,44 @@ export const getInvoiceData = async (req: Request, res: Response, next: NextFunc
         if (!details) return res.status(404).json({ success: false, message: 'Booking not found' });
 
         const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        const url = new URL(`${baseUrl}/booking-details`);
-        Object.entries(details).forEach(([key, value]) => url.searchParams.append(key, String(value)));
-
-        const qrCodeImage = await QRCode.toDataURL(url.toString());
+        const verifyUrl = `${baseUrl}/verify-transaction/${id}`;
+        const qrCodeImage = await QRCode.toDataURL(verifyUrl);
+        
         res.status(200).json({ success: true, data: { ...details, qrCodeImage } });
     } catch (error) {
         next(error);
     }
 };
+
+export const getPublicBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const details = await BookingModel.getBookingDetailsForInvoice(id);
+        if (!details) return res.status(404).json({ success: false, message: 'Transaction not found.' });
+
+        // Add additional info like Seller/Owner name
+        const sql = `
+            SELECT CONCAT(s.first_name, ' ', s.last_name) as seller_name
+            FROM sellers s
+            JOIN houses h ON s.id = h.seller_id OR s.id = (SELECT seller_id FROM accommodations WHERE id = ?)
+            WHERE h.id = ? OR EXISTS(SELECT 1 FROM accommodations WHERE id = ?)
+            LIMIT 1
+        `;
+        // Simplification for the public view
+        const [seller] = await query<any[]>('SELECT CONCAT(s.first_name, " ", s.last_name) as seller_name FROM sellers s JOIN users u ON s.user_id = u.id WHERE s.id = (SELECT seller_id FROM houses WHERE id = ?) OR s.id = (SELECT seller_id FROM accommodations WHERE id = ?) OR s.id = (SELECT seller_id FROM vehicles WHERE id = ?) LIMIT 1', 
+        [details.house_id, details.accommodation_id, details.vehicle_id]);
+
+        res.status(200).json({ 
+            success: true, 
+            data: { 
+                ...details, 
+                seller_name: seller?.seller_name || 'Rivers Rwanda Owner' 
+            } 
+        });
+    } catch (error) {
+        next(error);
+    }
+}
 
 export const getAllBookings = async (req: Request, res: Response, next: NextFunction) => {
     try {

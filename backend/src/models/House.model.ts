@@ -42,10 +42,9 @@ export const getAllHouses = async (filters: any): Promise<House[]> => {
       sql += ' AND status = ?';
       params.push(filters.status);
   } else if (!filters.status) {
-      // Default public view
-      sql += " AND status IN ('available', 'rented', 'purchased', 'under maintenance')";
+      // Default public view: Only show available houses
+      sql += " AND status = 'available'";
   }
-  // If status is 'all', we don't add any status filter and show everything
 
   if (filters.province) {
     sql += ' AND province = ?';
@@ -74,7 +73,6 @@ export const getHouseById = async (id: string): Promise<House | null> => {
   return results[0] || null;
 };
 
-// Helper to strictly convert any value to 1 or 0 for MySQL TINYINT
 const toInt = (val: any) => (['true', true, 1, '1', 'on'].includes(val) ? 1 : 0);
 
 export const createHouse = async (data: any): Promise<string> => {
@@ -90,7 +88,6 @@ export const createHouse = async (data: any): Promise<string> => {
     VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   
-  // Explicitly ensure NO field is undefined. If a field is missing, use null.
   const params = [
     data.seller_id ?? null,
     data.purpose || 'rent',
@@ -141,7 +138,6 @@ export const updateHouse = async (id: string, data: any): Promise<void> => {
     if (booleanFields.includes(field)) {
         params.push(toInt(data[field]));
     } else {
-        // Important: Use null coalescing to prevent 'undefined'
         params.push(data[field] ?? null);
     }
   });

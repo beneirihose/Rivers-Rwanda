@@ -1,11 +1,14 @@
 import { Router } from 'express';
-import { createBooking, getMyBookings, cancelBooking, getInvoiceData, confirmPayment } from '../controllers/booking.controller';
+import { createBooking, getMyBookings, cancelBooking, getInvoiceData, confirmPayment, getPublicBookingDetails } from '../controllers/booking.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { uploadPaymentProof } from '../middleware/upload.middleware';
 
 const router = Router();
 
-// All routes here are authenticated
+// Public route for QR verification
+router.get('/verify/:id', getPublicBookingDetails);
+
+// All other routes are authenticated
 router.use(authenticate);
 
 // Create a new booking (for clients and agents)

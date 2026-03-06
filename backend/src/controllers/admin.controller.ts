@@ -19,7 +19,6 @@ export const createAdminUser = async (req: Request, res: Response, next: NextFun
     const { email, password, role, firstName, lastName, phoneNumber, nationalId } = req.body;
     const hashedPassword = await hashPassword(password);
     
-    // 1. Create the base user
     const userId = await UserModel.createUser({
       email,
       password_hash: hashedPassword,
@@ -27,7 +26,6 @@ export const createAdminUser = async (req: Request, res: Response, next: NextFun
       status: 'active'
     });
 
-    // 2. Create the appropriate profile based on role
     if (role === 'seller') {
         const sql = 'INSERT INTO sellers (id, user_id, first_name, last_name, phone_number, national_id, status) VALUES (UUID(), ?, ?, ?, ?, ?, "approved")';
         await query(sql, [userId, firstName, lastName, phoneNumber, nationalId]);
@@ -179,17 +177,6 @@ export const deleteSeller = async (req: Request, res: Response, next: NextFuncti
 
 export const getPendingProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // 1. Houses
-    const housesSql = `
-        SELECT h.id, h.title as name, 'house' as type, h.created_at, h.images, h.status,
-               s.first_name, s.last_name, u.email, s.phone_number
-        FROM houses h
-        LEFT JOIN sellers s ON h.seller_id = s.id
-        LEFT JOIN users u ON h.user_id = u.id -- Potentially incorrect, linked via sellers table usually
-        OR h.seller_id = s.id
-        WHERE h.status IN ('pending_approval', 'available', 'rented', 'purchased')
-    `;
-    // Note: Re-corrected SQL to ensure joins are robust
     const houses = await query(`
         SELECT h.id, h.title as name, 'house' as type, h.created_at, h.images, h.status,
                s.first_name, s.last_name, u.email, s.phone_number
@@ -199,7 +186,6 @@ export const getPendingProducts = async (req: Request, res: Response, next: Next
         WHERE h.status IN ('pending_approval', 'available', 'rented', 'purchased')
     `);
 
-    // 2. Accommodations
     const accommodations = await query(`
         SELECT a.id, a.name, a.type, a.created_at, a.images, a.status,
                s.first_name, s.last_name, u.email, s.phone_number
@@ -209,7 +195,6 @@ export const getPendingProducts = async (req: Request, res: Response, next: Next
         WHERE a.status IN ('pending_approval', 'available', 'unavailable')
     `);
 
-    // 3. Vehicles
     const vehicles = await query(`
         SELECT v.id, CONCAT(v.make, ' ', v.model) as name, 'vehicle' as type, v.created_at, v.images, v.status,
                s.first_name, s.last_name, u.email, s.phone_number
@@ -334,10 +319,29 @@ export const deleteBooking = async (req: Request, res: Response, next: NextFunct
 export const verifyBookingPayment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookingId } = req.params;
+    
+    // 1. Verify Payment
     await query(`UPDATE payments SET status = 'completed', verified_at = CURRENT_TIMESTAMP WHERE booking_id = ?`, [bookingId]);
-    await query(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bookingId]);
-    res.status(200).json({ success: true, message: 'Payment verified and booking updated.' });
+    await query(`UPDATE bookings SET payment_status = 'paid', booking_status = 'confirmed' WHERE id = ?`, [bookingId]);
+
+    // 2. Fetch booking details to find the associated property
+    const booking = await BookingModel.getBookingById(bookingId);
+    if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+
+    // 3. Update associated property status to hide it from public listing
+    if (booking.house_id) {
+        const status = booking.booking_type === 'house_rent' ? 'rented' : 'purchased';
+        await query(`UPDATE houses SET status = ? WHERE id = ?`, [status, booking.house_id]);
+    } else if (booking.vehicle_id) {
+        const status = booking.booking_type === 'vehicle_rent' ? 'rented' : 'sold';
+        await query(`UPDATE vehicles SET status = ? WHERE id = ?`, [status, booking.vehicle_id]);
+    } else if (booking.accommodation_id) {
+        await query(`UPDATE accommodations SET status = 'unavailable' WHERE id = ?`, [booking.accommodation_id]);
+    }
+
+    res.status(200).json({ success: true, message: 'Payment verified, booking confirmed, and property updated.' });
   } catch (error) {
+    console.error('[VERIFY_PAYMENT_ERROR]:', error);
     next(error);
   }
 };

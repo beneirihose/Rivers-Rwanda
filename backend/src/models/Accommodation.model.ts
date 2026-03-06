@@ -36,8 +36,8 @@ export const getAllAccommodations = async (filters: any): Promise<Accommodation[
       sql += ' AND status = ?';
       params.push(filters.status);
   } else {
-      // Include available and unavailable (rented/sold) items in the public view
-      sql += " AND status IN ('available', 'unavailable', 'maintenance')";
+      // Default public view: Only show available accommodations
+      sql += " AND status = 'available'";
   }
 
   if (filters.type) {
