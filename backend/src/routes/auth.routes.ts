@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { register, login, verifyEmail, forgotPassword, resetPassword, resendOtp } from '../controllers/auth.controller';
+import { register, login, verifyEmail, forgotPassword, resetPassword, resendOtp, changePassword } from '../controllers/auth.controller';
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -12,5 +13,8 @@ router.post('/resend-otp', resendOtp);
 // Password Reset Routes
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+
+// Protected routes
+router.post('/change-password', authenticate, changePassword);
 
 export default router;

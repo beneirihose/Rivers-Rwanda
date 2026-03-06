@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard, Bell, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api';
 
@@ -11,14 +11,21 @@ const Header = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<string | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const dropdownRef = useRef<HTMLLIElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/verify-otp'].includes(location.pathname);
+  const isWhitePage = ['/about', '/contact', '/accommodations', '/cars', '/houses', '/profile', '/settings'].some(path => location.pathname.startsWith(path));
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -30,6 +37,9 @@ const Header = () => {
       }
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileDropdownOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
       }
     };
 
@@ -54,6 +64,7 @@ const Header = () => {
         try {
           const response = await api.get('/users/profile');
           setProfile(response.data.data);
+          fetchNotifications();
         } catch (error) {
           if ((error as any).response?.status === 401) handleLogout(true);
         }
@@ -62,11 +73,22 @@ const Header = () => {
     fetchProfile();
   }, [token, location.pathname]);
 
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data.data);
+      setUnreadCount(res.data.unreadCount);
+    } catch (err) {
+      console.error("Failed to fetch notifications");
+    }
+  };
+
   useEffect(() => {
     setIsMenuOpen(false);
     setActiveDropdown(null);
     setActiveMobileSubmenu(null);
     setIsProfileDropdownOpen(false);
+    setIsNotificationsOpen(false);
   }, [location.pathname]);
 
   const handleLogout = (silent = false) => {
@@ -77,6 +99,14 @@ const Header = () => {
 
   const handleDropdownToggle = (name: string) => {
     setActiveDropdown(activeDropdown === name ? null : name);
+  };
+
+  const markAllRead = async () => {
+    try {
+      await api.put('/notifications/mark-all-read');
+      setUnreadCount(0);
+      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+    } catch (err) {}
   };
 
   const navLinks = [
@@ -106,15 +136,15 @@ const Header = () => {
   };
 
   return (
-    <header className={`w-full fixed top-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-primary-dark/90 backdrop-blur-md py-2 shadow-2xl' : 'bg-transparent py-4'}`}>
-      <div className="container mx-auto flex justify-between items-center px-6 h-16">
+    <header className={`w-full fixed top-0 z-50 transition-all duration-500 ${(isScrolled || isAuthPage || isWhitePage) ? 'bg-primary-dark py-2 shadow-2xl' : 'bg-transparent py-4'}`}>
+      <div className="container mx-auto flex justify-between items-center px-4 md:px-6 h-16">
 
         {/* Modern Text Logo */}
-        <Link to="/" className="flex flex-col group">
-          <span className="text-xl md:text-2xl font-black tracking-tighter text-accent-orange leading-none group-hover:scale-105 transition-transform duration-300">
+        <Link to="/" className="flex flex-col group shrink-0">
+          <span className="text-lg md:text-2xl font-black tracking-tighter text-accent-orange leading-none group-hover:scale-105 transition-transform duration-300">
             RIVERS RWANDA
           </span>
-          <span className="text-xl md:text-2xl font-black tracking-tighter text-accent-orange leading-none group-hover:scale-105 transition-transform duration-300">
+          <span className="text-lg md:text-2xl font-black tracking-tighter text-accent-orange leading-none group-hover:scale-105 transition-transform duration-300">
             ACCOMMODATION
           </span>
         </Link>
@@ -163,19 +193,74 @@ const Header = () => {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 md:gap-6">
+          {/* Action Icons */}
+          {token && (
+            <div className="hidden md:flex items-center gap-4 text-white/60">
+              <div className="relative" ref={notificationRef}>
+                <button 
+                  onClick={() => { setIsNotificationsOpen(!isNotificationsOpen); setIsProfileDropdownOpen(false); }}
+                  className="hover:text-accent-orange transition-colors relative"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                
+                <AnimatePresence>
+                  {isNotificationsOpen && (
+                    <motion.div
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      className="absolute top-full right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+                    >
+                      <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Notifications</h4>
+                        {unreadCount > 0 && (
+                          <button onClick={markAllRead} className="text-[9px] font-black text-accent-orange uppercase hover:underline">Mark all read</button>
+                        )}
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((n) => (
+                            <div key={n.id} className={`p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-orange-50/30' : ''}`}>
+                              <p className="text-[10px] font-black text-primary-dark uppercase mb-1">{n.title}</p>
+                              <p className="text-[11px] text-gray-500 leading-tight">{n.message}</p>
+                              <p className="text-[8px] text-gray-400 mt-2 uppercase font-bold">{new Date(n.created_at).toLocaleDateString()}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center text-gray-400 uppercase font-black text-[10px]">No new notifications</div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              <Link to="/settings" className="hover:text-accent-orange transition-colors">
+                <Settings size={20} />
+              </Link>
+            </div>
+          )}
+
           {/* User Auth/Profile */}
-          <div className="relative" ref={profileRef}>
+          <div className="relative shrink-0" ref={profileRef}>
             {token && profile ? (
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-1.5 pr-4 rounded-full transition-all border border-white/10"
+                  onClick={() => { setIsProfileDropdownOpen(!isProfileDropdownOpen); setIsNotificationsOpen(false); }}
+                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-1 md:p-1.5 pr-2 md:pr-4 rounded-full transition-all border border-white/10"
                 >
                   <img
                     src={getProfileImage() || '/user-placeholder.png'}
                     alt="Profile"
-                    className="w-8 h-8 rounded-full border-2 border-accent-orange object-cover shadow-lg"
+                    className="w-7 h-7 md:w-8 md:h-8 rounded-full border-2 border-accent-orange object-cover shadow-lg"
                   />
                   <div className="hidden lg:block text-left">
                     <p className="text-white font-black text-[10px] uppercase tracking-wider leading-none">{getDisplayName()}</p>
@@ -219,7 +304,7 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="bg-accent-orange text-white px-8 py-3 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl shadow-accent-orange/20"
+                className="bg-accent-orange text-white px-4 md:px-8 py-2 md:py-3 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl shadow-accent-orange/20 whitespace-nowrap"
               >
                 Sign In
               </Link>
@@ -229,9 +314,9 @@ const Header = () => {
           {/* Mobile Toggle */}
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden p-2 text-white bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all"
+            className="lg:hidden p-2 text-white bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all shrink-0"
           >
-            <Menu size={24} />
+            <Menu size={20} />
           </button>
         </div>
       </div>

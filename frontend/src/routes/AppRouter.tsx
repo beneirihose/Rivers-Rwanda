@@ -57,6 +57,7 @@ import AddVehicleForm from '../pages/Seller/AddVehicleForm';
 
 // Common Dashboard Pages
 import Profile from '../pages/Profile/Profile';
+import Settings from '../pages/Settings/Settings';
 
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout';
 
@@ -77,7 +78,7 @@ const AppContent = () => {
                       location.pathname.startsWith('/agent') || 
                       location.pathname.startsWith('/admin') ||
                       location.pathname.startsWith('/seller');
-
+                      
   return (
     <div className={`app-container ${isDashboard ? 'dashboard-view' : ''}`}>
       {!isDashboard && <Header />}
@@ -101,6 +102,13 @@ const AppContent = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/booking-details" element={<BookingDetails />} />
           <Route path="/payment/confirm" element={<PaymentConfirmation />} />
+          
+          {/* Shared Protected Routes */}
+          <Route path="/settings" element={
+            <ProtectedRoute allowedRoles={['client', 'agent', 'seller', 'admin']}>
+              <Settings />
+            </ProtectedRoute>
+          } />
 
           {/* Client Routes */}
           <Route path="/client/*" element={
@@ -110,6 +118,7 @@ const AppContent = () => {
                   <Route path="dashboard" element={<ClientDashboard />} />
                   <Route path="bookings" element={<ClientBookings />} />
                   <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>
@@ -124,6 +133,7 @@ const AppContent = () => {
                   <Route path="clients" element={<AgentClients />} />
                   <Route path="earnings" element={<AgentEarnings />} />
                   <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>
@@ -146,6 +156,7 @@ const AppContent = () => {
                   <Route path="agents" element={<AgentManagement />} />
                   <Route path="inquiries" element={<InquiryManagement />} />
                   <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>
@@ -163,6 +174,7 @@ const AppContent = () => {
                   <Route path="products/new/accommodation" element={<AddAccommodationForm />} />
                   <Route path="products/new/vehicle" element={<AddVehicleForm />} />
                   <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>

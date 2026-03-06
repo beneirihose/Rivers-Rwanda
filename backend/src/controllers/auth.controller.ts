@@ -5,6 +5,7 @@ import { hashPassword, comparePassword } from '../utils/bcrypt.utils';
 import { createOtp, sendOtpEmail } from '../utils/otp.util';
 import { v4 as uuidv4 } from 'uuid';
 import { query } from '../database/connection';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   const { fullName, email, phone, password, role, nationalId } = req.body;
@@ -168,3 +169,23 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
         res.status(200).json({ success: true, message: 'Password reset successfully.' });
     } catch (error) { next(error); }
 }
+
+export const changePassword = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user?.userId;
+
+    try {
+        const [user] = await query<any[]>('SELECT password_hash FROM users WHERE id = ?', [userId]);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const isMatch = await comparePassword(currentPassword, user.password_hash);
+        if (!isMatch) return res.status(400).json({ success: false, message: 'Incorrect current password' });
+
+        const hashedPassword = await hashPassword(newPassword);
+        await query('UPDATE users SET password_hash = ? WHERE id = ?', [hashedPassword, userId]);
+
+        res.status(200).json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
+        next(error);
+    }
+};

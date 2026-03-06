@@ -5,6 +5,7 @@ import * as AccommodationModel from '../models/Accommodation.model';
 import * as VehicleModel from '../models/Vehicle.model';
 import * as HouseModel from '../models/House.model';
 import * as CommissionModel from '../models/Commission.model';
+import * as NotificationModel from '../models/Notification.model';
 import { getClientIdByUserId, findUserByEmail } from '../models/User.model';
 import { getAgentId } from '../utils/agent.utils';
 import { sendBookingConfirmationEmail } from '../services/email.service';
@@ -95,8 +96,10 @@ async function processConfirmedBooking(bookingId: string) {
         if (agentInfo) { emails.push(agentInfo.email); agentName = agentInfo.name; }
     }
 
-    const [admins] = await query<any[]>('SELECT email FROM users WHERE role = "admin" AND status = "active"');
-    if (Array.isArray(admins)) { admins.forEach(adm => emails.push(adm.email)); } else if (admins) { emails.push(admins.email); }
+    const [admins] = await query<any[]>('SELECT email, id FROM users WHERE role = "admin" AND status = "active"');
+    if (Array.isArray(admins)) { 
+        admins.forEach(adm => emails.push(adm.email)); 
+    }
 
     // 5. Send Professional Confirmation Email to All Parties
     await sendBookingConfirmationEmail(emails, {
@@ -108,6 +111,14 @@ async function processConfirmedBooking(bookingId: string) {
         sellerName,
         bookingType: booking.booking_type,
         isSale: booking.booking_type.includes('purchase')
+    });
+
+    // 6. In-App Notifications for Confirmation
+    await NotificationModel.createNotification({
+        user_id: clientInfo.user_id || booking.client_id, // Need to ensure we have user_id
+        title: 'Booking Confirmed!',
+        message: `Your booking for ${propertyName} (${booking.booking_reference}) has been confirmed.`,
+        type: 'booking'
     });
 }
 
@@ -155,6 +166,13 @@ export const createBooking = async (req: AuthenticatedRequest, res: Response, ne
         payment_proof_path: getRelativePath(req.file.path)
       });
     }
+
+    // TRIGGER NOTIFICATION TO ADMINS
+    await NotificationModel.notifyAdmins(
+        'New Booking Request',
+        `A new booking request (${newBooking.booking_reference}) has been submitted for review.`,
+        'booking'
+    );
     
     res.status(201).json({ 
         success: true, 
