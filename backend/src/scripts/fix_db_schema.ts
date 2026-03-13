@@ -1,22 +1,50 @@
 import { query, connectDatabase } from '../database/connection';
 
+const addColumnIfMissing = async (table: string, column: string, definition: string) => {
+    try {
+        await query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+        console.log(`Successfully added ${table}.${column} column.`);
+    } catch (e: any) {
+        if (e.code === 'ER_DUP_COLUMN_NAME') {
+            // console.log(`Note: ${table}.${column} column already exists.`);
+        } else {
+            console.error(`Error adding ${column} to ${table}:`, e.message);
+        }
+    }
+};
+
 const fixSchema = async () => {
     try {
         await connectDatabase();
         console.log("Connected to database. Applying fixes...");
 
-        // 1. Make seller_id nullable in houses
-        await query('ALTER TABLE houses MODIFY COLUMN seller_id CHAR(36) NULL');
-        console.log("Successfully made houses.seller_id nullable.");
+        // 1. Make seller_id nullable
+        await query('ALTER TABLE houses MODIFY COLUMN seller_id CHAR(36) NULL').catch(() => {});
+        await query('ALTER TABLE accommodations MODIFY COLUMN seller_id CHAR(36) NULL').catch(() => {});
+        await query('ALTER TABLE vehicles MODIFY COLUMN seller_id CHAR(36) NULL').catch(() => {});
 
-        // 2. Make seller_id nullable in accommodations
-        await query('ALTER TABLE accommodations MODIFY COLUMN seller_id CHAR(36) NULL');
-        console.log("Successfully made accommodations.seller_id nullable.");
+        // 2. Fix Accommodations Table Columns
+        await addColumnIfMissing('accommodations', 'sub_type', "ENUM('whole', 'room') DEFAULT 'whole' AFTER type");
+        await addColumnIfMissing('accommodations', 'bedrooms', "INT AFTER currency");
+        await addColumnIfMissing('accommodations', 'bathrooms', "INT AFTER bedrooms");
+        await addColumnIfMissing('accommodations', 'max_guests', "INT AFTER bathrooms");
+        await addColumnIfMissing('accommodations', 'capacity', "INT AFTER max_guests");
+        await addColumnIfMissing('accommodations', 'wifi', "BOOLEAN DEFAULT FALSE AFTER capacity");
+        await addColumnIfMissing('accommodations', 'parking', "BOOLEAN DEFAULT FALSE AFTER wifi");
+        await addColumnIfMissing('accommodations', 'garden', "BOOLEAN DEFAULT FALSE AFTER parking");
+        await addColumnIfMissing('accommodations', 'decoration', "BOOLEAN DEFAULT FALSE AFTER garden");
+        await addColumnIfMissing('accommodations', 'gym', "BOOLEAN DEFAULT FALSE AFTER decoration");
+        await addColumnIfMissing('accommodations', 'kitchen', "BOOLEAN DEFAULT FALSE AFTER gym");
+        await addColumnIfMissing('accommodations', 'toilet', "BOOLEAN DEFAULT FALSE AFTER kitchen");
+        await addColumnIfMissing('accommodations', 'living_room', "BOOLEAN DEFAULT FALSE AFTER toilet");
+        await addColumnIfMissing('accommodations', 'swimming_pool', "BOOLEAN DEFAULT FALSE AFTER living_room");
+        await addColumnIfMissing('accommodations', 'floor_number', "INT AFTER swimming_pool");
+        await addColumnIfMissing('accommodations', 'room_name_number', "VARCHAR(100) AFTER floor_number");
+        await addColumnIfMissing('accommodations', 'bed_type', "ENUM('single', 'double', 'triple', 'other') AFTER room_name_number");
+        await addColumnIfMissing('accommodations', 'has_elevator', "BOOLEAN DEFAULT FALSE AFTER bed_type");
+        await addColumnIfMissing('accommodations', 'is_furnished', "BOOLEAN DEFAULT FALSE AFTER has_elevator");
 
-        // 3. Make seller_id nullable in vehicles
-        await query('ALTER TABLE vehicles MODIFY COLUMN seller_id CHAR(36) NULL');
-        console.log("Successfully made vehicles.seller_id nullable.");
-
+        console.log("Database fixes completed.");
         process.exit(0);
     } catch (error) {
         console.error("Failed to apply database fixes:", error);
