@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { CheckCircle, XCircle, Clock, Check, CreditCard, Eye, Trash2, Download, Printer, X, Calendar } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Check, CreditCard, Eye, Trash2, Download, Printer, X, Calendar, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Invoice from '../../components/common/Invoice';
 
@@ -86,6 +86,15 @@ const BookingManagement = () => {
     });
   };
 
+  const renderPropertyType = (b: any) => {
+    if (b.booking_type === 'accommodation') {
+      const typeStr = b.accommodation_type?.replace('_', ' ') || 'Accommodation';
+      const subTypeStr = b.accommodation_sub_type ? ` (${b.accommodation_sub_type})` : '';
+      return <span className="capitalize">{typeStr}{subTypeStr}</span>;
+    }
+    return <span className="capitalize">{b.booking_type?.replace('_', ' ')}</span>;
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-orange"></div></div>
   );
@@ -134,9 +143,18 @@ const BookingManagement = () => {
                 {bookings.map((booking) => (
                   <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-primary-dark capitalize">{booking.booking_type.replace('_', ' ')}</p>
-                      <p className="font-mono text-[10px] text-text-light mt-0.5">{booking.booking_reference}</p>
-                      <div className="mt-2 flex flex-col gap-1 text-[10px] font-bold uppercase tracking-tighter">
+                      <div className="flex flex-col gap-1">
+                        <p className="font-bold text-primary-dark capitalize truncate max-w-[200px]" title={booking.property_name}>
+                          {booking.property_name || booking.booking_type.replace('_', ' ')}
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase flex items-center gap-1">
+                          <Home size={10} className="text-accent-orange" />
+                          {renderPropertyType(booking)}
+                        </p>
+                        <p className="font-mono text-[9px] text-text-light">{booking.booking_reference}</p>
+                      </div>
+
+                      <div className="mt-3 flex flex-col gap-1 text-[10px] font-bold uppercase tracking-tighter">
                         <div className="flex items-center gap-1.5 text-orange-600">
                           <Calendar size={12} /> From: {formatDate(booking.start_date)}
                         </div>

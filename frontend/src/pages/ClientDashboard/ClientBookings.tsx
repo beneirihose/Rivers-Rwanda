@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { BookOpen, Download, Printer, Eye, X, XCircle, Calendar } from 'lucide-react';
+import { BookOpen, Download, Printer, Eye, X, XCircle, Calendar, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Invoice from '../../components/common/Invoice';
 
@@ -57,6 +57,15 @@ const ClientBookings = () => {
       month: '2-digit',
       year: 'numeric'
     });
+  };
+
+  const renderPropertyType = (b: any) => {
+    if (b.booking_type === 'accommodation') {
+      const typeStr = b.accommodation_type?.replace('_', ' ') || 'Accommodation';
+      const subTypeStr = b.accommodation_sub_type ? ` (${b.accommodation_sub_type})` : '';
+      return <span className="capitalize">{typeStr}{subTypeStr}</span>;
+    }
+    return <span className="capitalize">{b.booking_type?.replace('_', ' ')}</span>;
   };
 
   if (loading) return (
@@ -117,8 +126,17 @@ const ClientBookings = () => {
                           {b.booking_reference}
                         </td>
                         <td className="px-8 py-6">
-                          <p className="font-bold text-primary-dark uppercase tracking-tight">{b.booking_type.replace('_', ' ')}</p>
-                          <div className="mt-2 flex flex-col gap-1">
+                          <div className="flex flex-col gap-1">
+                            <p className="font-bold text-primary-dark uppercase tracking-tight flex items-center gap-2">
+                              {b.property_name || b.booking_type.replace('_', ' ')}
+                            </p>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase flex items-center gap-1">
+                              <Home size={10} className="text-accent-orange" />
+                              {renderPropertyType(b)}
+                            </p>
+                          </div>
+                          
+                          <div className="mt-3 flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-wider">
                               <Calendar size={12} className="text-accent-orange" />
                               <span>From: {formatDate(b.start_date)}</span>

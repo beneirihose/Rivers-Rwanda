@@ -6,9 +6,15 @@ export const getBookingsByClientId = async (clientId: string): Promise<Booking[]
   const sql = `
     SELECT 
       b.*,
-      p.payment_proof_path
+      p.payment_proof_path,
+      COALESCE(h.title, acc.name, CONCAT(v.make, ' ', v.model)) as property_name,
+      acc.type as accommodation_type,
+      acc.sub_type as accommodation_sub_type
     FROM bookings as b
     LEFT JOIN payments as p ON b.id = p.booking_id
+    LEFT JOIN houses as h ON b.house_id = h.id
+    LEFT JOIN accommodations as acc ON b.accommodation_id = acc.id
+    LEFT JOIN vehicles as v ON b.vehicle_id = v.id
     WHERE b.client_id = ? 
     ORDER BY b.created_at DESC
   `;
@@ -21,10 +27,16 @@ export const getBookingsBySellerId = async (sellerId: string): Promise<Booking[]
       b.*,
       p.payment_proof_path,
       CONCAT(c.first_name, ' ', c.last_name) as client_name,
-      c.phone_number as client_phone
+      c.phone_number as client_phone,
+      COALESCE(h.title, acc.name, CONCAT(v.make, ' ', v.model)) as property_name,
+      acc.type as accommodation_type,
+      acc.sub_type as accommodation_sub_type
     FROM bookings as b
     LEFT JOIN clients as c ON b.client_id = c.id
     LEFT JOIN payments as p ON b.id = p.booking_id
+    LEFT JOIN houses as h ON b.house_id = h.id
+    LEFT JOIN accommodations as acc ON b.accommodation_id = acc.id
+    LEFT JOIN vehicles as v ON b.vehicle_id = v.id
     WHERE b.seller_id = ? 
     ORDER BY b.created_at DESC
   `;
@@ -56,7 +68,9 @@ export const getBookingDetailsForInvoice = async (bookingId: string): Promise<an
             h.full_address as house_address,
             v.make as vehicle_make,
             v.model as vehicle_model,
-            acc.name as accommodation_name
+            acc.name as accommodation_name,
+            acc.type as accommodation_type,
+            acc.sub_type as accommodation_sub_type
         FROM bookings as b
         LEFT JOIN clients as c ON b.client_id = c.id
         LEFT JOIN users as u ON c.user_id = u.id
@@ -93,6 +107,9 @@ export interface Booking extends RowDataPacket {
   client_name?: string;
   client_phone?: string;
   agent_name?: string;
+  property_name?: string;
+  accommodation_type?: string;
+  accommodation_sub_type?: string;
 }
 
 export const createBooking = async (data: any): Promise<Booking> => {
@@ -132,11 +149,17 @@ export const getAllBookings = async (): Promise<Booking[]> => {
       p.verified_at,
       CONCAT(c.first_name, ' ', c.last_name) as client_name,
       c.phone_number as client_phone,
-      CONCAT(a.first_name, ' ', a.last_name) as agent_name
+      CONCAT(a.first_name, ' ', a.last_name) as agent_name,
+      COALESCE(h.title, acc.name, CONCAT(v.make, ' ', v.model)) as property_name,
+      acc.type as accommodation_type,
+      acc.sub_type as accommodation_sub_type
     FROM bookings as b
     LEFT JOIN clients as c ON b.client_id = c.id
     LEFT JOIN agents as a ON b.agent_id = a.id
     LEFT JOIN payments as p ON b.id = p.booking_id
+    LEFT JOIN houses as h ON b.house_id = h.id
+    LEFT JOIN accommodations as acc ON b.accommodation_id = acc.id
+    LEFT JOIN vehicles as v ON b.vehicle_id = v.id
     ORDER BY b.created_at DESC
   `;
   return await query<Booking[]>(sql);
