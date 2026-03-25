@@ -3,8 +3,8 @@ import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { 
   Plus, Edit2, Trash2, X, Image as ImageIcon, XCircle, 
-  MapPin, Wifi, Car, TreePine, Sparkles, Box, Building2, Calendar, 
-  Dumbbell, Utensils, Bath, Tv, Waves, ArrowUpCircle, Sofa
+  MapPin, Wifi, Car, TreePine, Sparkles, Box, Calendar, 
+  Dumbbell, Utensils, Bath, Tv, Waves, ArrowUpCircle, Sofa, Volume2, Paintbrush
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,15 +34,15 @@ const AccommodationManagement = () => {
     price_per_night: '',
     price_per_event: '',
     sale_price: '',
-    max_guests: '',
-    capacity: '',
     floor_number: '',
+    number_of_living_rooms: '',
     room_name_number: '',
     bed_type: 'single',
     wifi: false,
     parking: false,
     garden: false,
     decoration: false,
+    sonolization: false,
     gym: false,
     kitchen: false,
     toilet: false,
@@ -70,9 +70,9 @@ const AccommodationManagement = () => {
   const resetForm = () => {
     setFormData({
         type: 'apartment', sub_type: 'whole', purpose: 'rent', name: '', description: '', city: 'Kigali', district: '', street_address: '',
-        price_per_night: '', price_per_event: '', sale_price: '', max_guests: '', capacity: '', floor_number: '',
+        price_per_night: '', price_per_event: '', sale_price: '', floor_number: '', number_of_living_rooms: '',
         room_name_number: '', bed_type: 'single',
-        wifi: false, parking: false, garden: false, decoration: false, gym: false, kitchen: false, 
+        wifi: false, parking: false, garden: false, decoration: false, sonolization: false, gym: false, kitchen: false, 
         toilet: false, living_room: false, swimming_pool: false, has_elevator: false, is_furnished: false,
         status: 'available'
       });
@@ -119,15 +119,15 @@ const AccommodationManagement = () => {
       price_per_night: item.price_per_night || '',
       price_per_event: item.price_per_event || '',
       sale_price: item.sale_price || '',
-      max_guests: item.max_guests || '',
-      capacity: item.capacity || '',
       floor_number: item.floor_number || '',
+      number_of_living_rooms: item.number_of_living_rooms || '',
       room_name_number: item.room_name_number || '',
       bed_type: item.bed_type || 'single',
       wifi: !!item.wifi,
       parking: !!item.parking,
       garden: !!item.garden,
       decoration: !!item.decoration,
+      sonolization: !!item.sonolization,
       gym: !!item.gym,
       kitchen: !!item.kitchen,
       toilet: !!item.toilet,
@@ -237,10 +237,14 @@ const AccommodationManagement = () => {
                     <input className="w-full p-4 border-2 rounded-2xl font-bold bg-gray-50" placeholder="Street Address / Detailed Location" value={formData.street_address} onChange={e => setFormData({...formData, street_address: e.target.value})} />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 bg-gray-50 rounded-[2.5rem] border border-gray-100">
-                    <div className="space-y-2"><label className="text-[9px] font-black uppercase text-gray-400">Max Guests</label><input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.max_guests} onChange={e => setFormData({...formData, max_guests: e.target.value})} /></div>
-                    <div className="space-y-2"><label className="text-[9px] font-black uppercase text-gray-400">Capacity (People)</label><input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.capacity} onChange={e => setFormData({...formData, capacity: e.target.value})} /></div>
-                    <div className="space-y-2"><label className="text-[9px] font-black uppercase text-gray-400">Floor Number</label><input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.floor_number} onChange={e => setFormData({...formData, floor_number: e.target.value})} /></div>
+                {/* Floor / Room details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-gray-50 rounded-[2.5rem] border border-gray-100">
+                    {formData.type !== 'event_hall' && (
+                        <div className="space-y-2"><label className="text-[9px] font-black uppercase text-gray-400">Floor Number</label><input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.floor_number} onChange={e => setFormData({...formData, floor_number: e.target.value})} /></div>
+                    )}
+                    {formData.type === 'apartment' && (
+                        <div className="space-y-2"><label className="text-[9px] font-black uppercase text-gray-400">Number of Living Rooms</label><input type="number" min={0} className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.number_of_living_rooms} onChange={e => setFormData({...formData, number_of_living_rooms: e.target.value})} /></div>
+                    )}
                 </div>
 
                 {(formData.sub_type === 'room' || formData.type === 'hotel_room') && (
@@ -258,37 +262,66 @@ const AccommodationManagement = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 bg-orange-50/50 rounded-[2.5rem] border border-orange-100">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Calendar size={14}/> Price Per Night (Rwf)</label>
-                        <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.price_per_night} onChange={e => setFormData({...formData, price_per_night: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Sparkles size={14}/> Price Per Event (Rwf)</label>
-                        <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.price_per_event} onChange={e => setFormData({...formData, price_per_event: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Box size={14}/> Sale Price (Rwf)</label>
-                        <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.sale_price} onChange={e => setFormData({...formData, sale_price: e.target.value})} />
-                    </div>
+                {/* Pricing - type-specific */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-orange-50/50 rounded-[2.5rem] border border-orange-100">
+                    {formData.type === 'event_hall' && (
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Sparkles size={14}/> Price Per Event (Rwf)</label>
+                            <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.price_per_event} onChange={e => setFormData({...formData, price_per_event: e.target.value})} />
+                        </div>
+                    )}
+                    {formData.type === 'hotel_room' && (
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Calendar size={14}/> Price Per Night (Rwf)</label>
+                            <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.price_per_night} onChange={e => setFormData({...formData, price_per_night: e.target.value})} />
+                        </div>
+                    )}
+                    {formData.type === 'apartment' && (formData.purpose === 'rent' || formData.purpose === 'both') && (
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Calendar size={14}/> Price Per Night (Rwf)</label>
+                            <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.price_per_night} onChange={e => setFormData({...formData, price_per_night: e.target.value})} />
+                        </div>
+                    )}
+                    {formData.type === 'apartment' && (formData.purpose === 'sale' || formData.purpose === 'both') && (
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-primary-dark flex items-center gap-2"><Box size={14}/> Sale Price (Rwf)</label>
+                            <input type="number" className="w-full p-4 border-2 border-white rounded-2xl font-bold" value={formData.sale_price} onChange={e => setFormData({...formData, sale_price: e.target.value})} />
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-6">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Features & Amenities</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {[ 
-                            { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> }, 
-                            { id: 'parking', label: 'Parking', icon: <Car size={20}/> }, 
-                            { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> }, 
-                            { id: 'gym', label: 'Gym', icon: <Dumbbell size={20}/> }, 
-                            { id: 'kitchen', label: 'Kitchen', icon: <Utensils size={20}/> }, 
-                            { id: 'toilet', label: 'Toilet', icon: <Bath size={20}/> }, 
-                            { id: 'living_room', label: 'Living Room', icon: <Tv size={20}/> }, 
-                            { id: 'swimming_pool', label: 'Pool', icon: <Waves size={20}/> }, 
-                            { id: 'decoration', label: 'Decoration', icon: <Sparkles size={20}/> }, 
-                            { id: 'has_elevator', label: 'Elevator', icon: <ArrowUpCircle size={20}/> }, 
-                            { id: 'is_furnished', label: 'Furnished', icon: <Sofa size={20}/> }
-                        ].map(feat => (
+                        {(formData.type === 'event_hall' ? [
+                            { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> },
+                            { id: 'parking', label: 'Parking', icon: <Car size={20}/> },
+                            { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> },
+                            { id: 'decoration', label: 'Decoration', icon: <Paintbrush size={20}/> },
+                            { id: 'sonolization', label: 'Sonolization', icon: <Volume2 size={20}/> },
+                        ] : formData.type === 'hotel_room' ? [
+                            { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> },
+                            { id: 'parking', label: 'Parking', icon: <Car size={20}/> },
+                            { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> },
+                            { id: 'gym', label: 'Gym', icon: <Dumbbell size={20}/> },
+                            { id: 'kitchen', label: 'Kitchen', icon: <Utensils size={20}/> },
+                            { id: 'toilet', label: 'Bathroom', icon: <Bath size={20}/> },
+                            { id: 'living_room', label: 'Living Room', icon: <Tv size={20}/> },
+                            { id: 'swimming_pool', label: 'Pool', icon: <Waves size={20}/> },
+                            { id: 'has_elevator', label: 'Elevator', icon: <ArrowUpCircle size={20}/> },
+                            { id: 'is_furnished', label: 'Furnished', icon: <Sofa size={20}/> },
+                        ] : [
+                            { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> },
+                            { id: 'parking', label: 'Parking', icon: <Car size={20}/> },
+                            { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> },
+                            { id: 'gym', label: 'Gym', icon: <Dumbbell size={20}/> },
+                            { id: 'kitchen', label: 'Kitchen', icon: <Utensils size={20}/> },
+                            { id: 'toilet', label: 'Bathroom', icon: <Bath size={20}/> },
+                            { id: 'living_room', label: 'Living Room', icon: <Tv size={20}/> },
+                            { id: 'swimming_pool', label: 'Pool', icon: <Waves size={20}/> },
+                            { id: 'has_elevator', label: 'Elevator', icon: <ArrowUpCircle size={20}/> },
+                            { id: 'is_furnished', label: 'Furnished', icon: <Sofa size={20}/> },
+                        ]).map(feat => (
                             <label key={feat.id} className="cursor-pointer group">
                                 <input type="checkbox" className="hidden" checked={(formData as any)[feat.id]} onChange={e => setFormData({...formData, [feat.id]: e.target.checked})} />
                                 <div className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${(formData as any)[feat.id] ? 'bg-accent-orange border-accent-orange text-white' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>

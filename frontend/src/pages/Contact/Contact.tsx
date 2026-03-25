@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe, Facebook, Instagram, Twitter, Linkedin, ChevronDown } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe, Facebook, Instagram, Twitter, Linkedin, ChevronDown, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -24,38 +26,35 @@ const Contact = () => {
     setLoading(true);
     try {
       await api.post('/contact', formData);
-      toast.success('Your message has been sent successfully!');
+      toast.success(t('contact.success'));
       setFormData({ fullName: '', email: '', phoneNumber: '', subject: '', message: '' });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+      toast.error(error.response?.data?.message || t('contact.error'));
     } finally {
       setLoading(false);
     }
   };
 
-  // Using a simpler embed URL that doesn't always require an API key for basic display
   const mapSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.502834375!2d30.0631!3d-1.9441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca425b5254945%3A0x27438478f7e8979e!2sUniversity%20of%20Lay%20Adventists%20of%20Kigali%20(UNILAK)!5e0!3m2!1sen!2srw!4v1700000000000!5m2!1sen!2srw";
 
   const faqs = [
     {
-      q: "How long does it take to get a response?",
-      a: "Our team typically responds to all inquiries within 24 business hours. For urgent booking issues, please use our emergency phone line."
+      q: t('contact.faq1Q', { defaultValue: "How long does it take to get a response?" }),
+      a: t('contact.faq1A', { defaultValue: "Our team typically responds to all inquiries within 24 business hours." })
     },
     {
-      q: "Can I visit your office in person?",
-      a: "Yes! We welcome visitors at our office located at UNILAK, Kigali, from Monday to Friday, 8:00 AM to 6:00 PM."
+      q: t('contact.faq2Q', { defaultValue: "Can I visit your office in person?" }),
+      a: t('contact.faq2A', { defaultValue: "Yes! We welcome visitors at our office located at UNILAK, Kigali." })
     },
     {
-      q: "How do I list my property with Rivers Rwanda?",
-      a: "You can register as a Seller/Agent on our platform. Once verified, you'll be able to list accommodations, cars, or houses directly from your dashboard."
+      q: t('contact.faq3Q', { defaultValue: "How do I list my property?" }),
+      a: t('contact.faq3A', { defaultValue: "You can register as a Seller/Agent on our platform." })
     }
   ];
 
   return (
     <div className="bg-[#f8fafc] min-h-screen">
-      {/* Hero Section */}
       <section className="relative bg-primary-dark pt-32 pb-48 overflow-hidden">
-        {/* Decorative Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-10">
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent-orange rounded-full blur-3xl"></div>
           <div className="absolute top-1/2 -right-24 w-64 h-64 bg-blue-400 rounded-full blur-3xl"></div>
@@ -68,23 +67,20 @@ const Contact = () => {
             transition={{ duration: 0.6 }}
           >
             <span className="inline-block px-4 py-1.5 bg-accent-orange/10 text-accent-orange rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-accent-orange/20">
-              Get In Touch
+              {t('contact.badge')}
             </span>
             <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">
-              Let's Start a <span className="text-accent-orange">Conversation</span>
+              {t('contact.heroTitle')} <span className="text-accent-orange">{t('contact.heroTitleAccent')}</span>
             </h1>
             <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-              Have a question about our services? Our dedicated team is ready to assist you with all your accommodation and travel needs in Rwanda.
+              {t('contact.heroSubtitle')}
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Main Content Grid */}
       <section className="container mx-auto px-6 -mt-32 pb-24 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left: Contact Info & Map */}
           <div className="lg:col-span-4 space-y-6">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -92,7 +88,7 @@ const Contact = () => {
               viewport={{ once: true }}
               className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100"
             >
-              <h3 className="text-xl font-black text-primary-dark uppercase tracking-tight mb-8">Contact Information</h3>
+              <h3 className="text-xl font-black text-primary-dark uppercase tracking-tight mb-8">{t('contact.infoTitle')}</h3>
               
               <div className="space-y-8">
                 <div className="flex gap-5 group">
@@ -100,7 +96,7 @@ const Contact = () => {
                     <MapPin size={22} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Office Location</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('contact.office')}</p>
                     <p className="text-sm font-bold text-primary-dark leading-relaxed">University of Lay Adventists of Kigali, KK 508 St, Kigali, Rwanda</p>
                   </div>
                 </div>
@@ -110,9 +106,9 @@ const Contact = () => {
                     <Phone size={22} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Direct Line</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('contact.directLine')}</p>
                     <p className="text-sm font-bold text-primary-dark">+250 792 659 094</p>
-                    <p className="text-xs text-gray-400 font-medium mt-1">Available 24/7 for support</p>
+                    <p className="text-xs text-gray-400 font-medium mt-1">{t('contact.support247')}</p>
                   </div>
                 </div>
 
@@ -121,15 +117,15 @@ const Contact = () => {
                     <Mail size={22} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Email Us</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('contact.emailUs')}</p>
                     <p className="text-sm font-bold text-primary-dark">info@rivers-rwanda.com</p>
-                    <p className="text-xs text-gray-400 font-medium mt-1">We'll respond within 24h</p>
+                    <p className="text-xs text-gray-400 font-medium mt-1">{t('contact.emailDesc')}</p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-12 pt-8 border-t border-gray-100">
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 text-center">Follow Our Journey</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 text-center">{t('contact.followJourney')}</p>
                 <div className="flex justify-center gap-4">
                   {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
                     <a key={i} href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-accent-orange hover:text-white hover:-translate-y-1 transition-all duration-300">
@@ -140,7 +136,6 @@ const Contact = () => {
               </div>
             </motion.div>
 
-            {/* Interactive Map Card */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -157,13 +152,12 @@ const Contact = () => {
               ></iframe>
               <div className="absolute bottom-6 right-6 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="bg-primary-dark text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <Globe size={12} className="text-accent-orange animate-spin-slow" /> Open Maps
+                  <Globe size={12} className="text-accent-orange animate-spin-slow" /> {t('contact.openMaps')}
                 </div>
               </div>
             </motion.div>
           </div>
 
-          {/* Right: Contact Form */}
           <div className="lg:col-span-8">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -173,16 +167,16 @@ const Contact = () => {
             >
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-1 bg-accent-orange rounded-full"></div>
-                <h2 className="text-2xl font-black text-primary-dark uppercase tracking-tight">Send us a Message</h2>
+                <h2 className="text-2xl font-black text-primary-dark uppercase tracking-tight">{t('contact.sendMessage')}</h2>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Full Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{t('contact.fullName')}</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-accent-orange transition-colors">
-                        <UserIcon size={18} />
+                        <User size={18} />
                       </div>
                       <input 
                         type="text" 
@@ -197,7 +191,7 @@ const Contact = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Email Address</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{t('contact.emailAddress')}</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-accent-orange transition-colors">
                         <Mail size={18} />
@@ -217,7 +211,7 @@ const Contact = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Phone Number</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{t('contact.phoneNumber')}</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-accent-orange transition-colors">
                         <Phone size={18} />
@@ -234,7 +228,7 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Inquiry Subject</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{t('contact.subject')}</label>
                     <div className="relative">
                       <select 
                         name="subject" 
@@ -243,11 +237,11 @@ const Contact = () => {
                         required 
                         className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent-orange/20 focus:bg-white focus:border-accent-orange appearance-none transition-all font-medium text-primary-dark"
                       >
-                        <option value="">Choose a topic</option>
-                        <option value="General Inquiry">General Inquiry</option>
-                        <option value="Booking Support">Booking Support</option>
-                        <option value="Technical Support">Technical Support</option>
-                        <option value="Agent Partnership">Agent Partnership</option>
+                        <option value="">{t('contact.chooseTopic')}</option>
+                        <option value="General Inquiry">{t('contact.generalInquiry')}</option>
+                        <option value="Booking Support">{t('contact.bookingSupport')}</option>
+                        <option value="Technical Support">{t('contact.techSupport')}</option>
+                        <option value="Agent Partnership">{t('contact.agentPartnership')}</option>
                       </select>
                       <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400">
                         <ChevronDown size={18} />
@@ -257,14 +251,14 @@ const Contact = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Message Content</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{t('contact.messageContent')}</label>
                   <textarea 
                     name="message" 
                     value={formData.message} 
                     onChange={handleChange} 
                     required 
                     rows={5} 
-                    placeholder="Tell us more about your needs..." 
+                    placeholder={t('contact.messagePlaceholder')} 
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent-orange/20 focus:bg-white focus:border-accent-orange transition-all font-medium text-primary-dark resize-none"
                   ></textarea>
                 </div>
@@ -280,7 +274,7 @@ const Contact = () => {
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   ) : (
                     <>
-                      <span>Send Message</span>
+                      <span>{t('contact.submit')}</span>
                       <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                     </>
                   )}
@@ -291,14 +285,12 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* FAQ & Quick Info Section */}
       <section className="bg-white py-24 border-y border-gray-100">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            
             <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-orange mb-4 block">Common Questions</span>
-              <h2 className="text-3xl md:text-4xl font-black text-primary-dark uppercase tracking-tight mb-8">Frequently Asked Questions</h2>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-orange mb-4 block">{t('contact.faqBadge')}</span>
+              <h2 className="text-3xl md:text-4xl font-black text-primary-dark uppercase tracking-tight mb-8">{t('contact.faqTitle')}</h2>
               
               <div className="space-y-4">
                 {faqs.map((faq, index) => (
@@ -330,28 +322,20 @@ const Contact = () => {
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-orange-50 p-8 rounded-[2rem] space-y-4">
                 <MessageSquare className="text-accent-orange" size={32} />
-                <h4 className="font-black text-primary-dark uppercase tracking-tight">Live Chat</h4>
-                <p className="text-xs text-gray-500 leading-relaxed font-medium">Coming soon! Instant support right from your browser.</p>
+                <h4 className="font-black text-primary-dark uppercase tracking-tight">{t('contact.liveChat')}</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium">{t('contact.liveChatDesc')}</p>
               </div>
               <div className="bg-blue-50 p-8 rounded-[2rem] space-y-4 mt-8">
                 <Clock className="text-blue-600" size={32} />
-                <h4 className="font-black text-primary-dark uppercase tracking-tight">Working Hours</h4>
-                <p className="text-xs text-gray-500 leading-relaxed font-medium">Mon - Fri: 8AM - 6PM<br/>Weekend: 10AM - 2PM</p>
+                <h4 className="font-black text-primary-dark uppercase tracking-tight">{t('contact.workingHours')}</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium">{t('contact.hoursWeek')}<br/>{t('contact.hoursWeekend')}</p>
               </div>
             </div>
-
           </div>
         </div>
       </section>
     </div>
   );
 };
-
-// Simple User Icon component since Lucide User might not be imported or I want to be safe
-const UserIcon = ({ size }: { size: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-  </svg>
-);
 
 export default Contact;

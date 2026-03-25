@@ -163,3 +163,29 @@ export const confirmPayoutReceipt = async (req: AuthenticatedRequest, res: Respo
         next(error);
     }
 };
+
+export const rejectPayoutReceipt = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user?.userId;
+        const sellerId = await UserModel.getSellerIdByUserId(userId!);
+        
+        const [commission] = await query<any[]>('SELECT * FROM commissions WHERE id = ? AND seller_id = ?', [id, sellerId]);
+        
+        if (!commission) {
+            return res.status(404).json({ success: false, message: 'Payout record not found or unauthorized.' });
+        }
+
+        if (commission.status !== 'paid') {
+            return res.status(400).json({ success: false, message: 'Only paid commissions can be rejected.' });
+        }
+
+        // Set status back to approved so admin can re-upload proof or correct payment
+        await CommissionModel.updateCommissionStatus(id, 'approved');
+        await query('UPDATE commissions SET payout_proof_path = NULL WHERE id = ?', [id]);
+
+        res.status(200).json({ success: true, message: 'Payout rejected. Admin has been notified to re-verify payment.' });
+    } catch (error) {
+        next(error);
+    }
+};

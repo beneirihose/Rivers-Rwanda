@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
-import { Wallet, Calendar, CheckCircle2, Clock, ArrowRight, TrendingUp, Eye, Check, X, Trash2, FileText, ExternalLink } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, TrendingUp, Check, X, Trash2, FileText, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
@@ -65,9 +65,9 @@ const AgentEarnings = () => {
     </div>
   );
 
-  const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
-  const totalEarned = commissions.reduce((acc, curr) => acc + (curr.status === 'completed' ? curr.amount : 0), 0);
-  const pendingPayout = commissions.reduce((acc, curr) => acc + (curr.status === 'approved' || curr.status === 'paid' ? curr.amount : 0), 0);
+  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
+  const totalEarned = commissions.reduce((acc, curr) => acc + (curr.status === 'completed' ? Number(curr.amount) : 0), 0);
+  const pendingPayout = commissions.reduce((acc, curr) => acc + (curr.status === 'approved' || curr.status === 'paid' ? Number(curr.amount) : 0), 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">

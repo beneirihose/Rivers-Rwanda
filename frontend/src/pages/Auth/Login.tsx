@@ -3,9 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { Mail, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import logo from '../../assets/images/logo.png';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ const Login = () => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      toast.success('Login successful!');
+      toast.success(t('auth.loginSuccess'));
       
       if (user.role === 'admin') navigate('/admin/dashboard');
       else if (user.role === 'agent') navigate('/agent/dashboard');
@@ -33,7 +35,7 @@ const Login = () => {
         toast.error(error.response.data.message);
         navigate(`/verify-email?userId=${error.response.data.userId}`);
       } else {
-        toast.error(error.response?.data?.message || 'Login failed');
+        toast.error(error.response?.data?.message || t('auth.loginFailed'));
       }
     } finally {
       setLoading(false);
@@ -46,17 +48,17 @@ const Login = () => {
         <div className="text-center">
           <img src={logo} alt="Rivers Rwanda Logo" className="mx-auto h-24 w-auto" />
           <h2 className="mt-6 text-3xl font-extrabold text-primary-dark">
-            Login to <span className="text-accent-orange uppercase">Rivers</span> Rwanda
+            {t('auth.loginTitle')} <span className="text-accent-orange uppercase">Rivers</span> Rwanda
           </h2>
           <p className="mt-2 text-sm text-text-light">
-            Welcome back! Please enter your details.
+            {t('auth.loginSubtitle')}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label className="block text-sm font-bold text-primary-dark uppercase tracking-wide mb-1">
-                Email Address
+                {t('auth.emailLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -74,7 +76,7 @@ const Login = () => {
             </div>
             <div>
               <label className="block text-sm font-bold text-primary-dark uppercase tracking-wide mb-1">
-                Password
+                {t('auth.passwordLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -101,13 +103,13 @@ const Login = () => {
                 className="h-4 w-4 text-accent-orange focus:ring-accent-orange border-gray-300 rounded cursor-pointer"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-text-light cursor-pointer">
-                Remember me
+                {t('auth.rememberMe')}
               </label>
             </div>
 
             <div className="text-sm">
               <Link to="/forgot-password" className="font-bold text-accent-orange hover:text-opacity-80">
-                Forgot your password?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
           </div>
@@ -121,16 +123,16 @@ const Login = () => {
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                'SIGN IN'
+                t('auth.signIn')
               )}
             </button>
           </div>
         </form>
         <div className="text-center mt-4">
           <p className="text-sm text-text-light font-medium">
-            Don't have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/register" className="font-bold text-accent-orange hover:underline uppercase tracking-wide">
-              Register here
+              {t('auth.registerHere')}
             </Link>
           </p>
         </div>

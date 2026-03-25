@@ -14,5 +14,6 @@ router.get('/bookings', getSellerBookings);
 router.get('/products', sellerController.getSellerProducts);
 router.get('/earnings', sellerController.getMyEarnings);
 router.patch('/commissions/:id/confirm-receipt', sellerController.confirmPayoutReceipt);
+router.patch('/commissions/:id/reject-receipt', sellerController.rejectPayoutReceipt);
 
 export default router;

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { BookOpen, Clock, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ClientDashboard = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({ totalBookings: 0, pending: 0, completed: 0 });
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +42,8 @@ const ClientDashboard = () => {
   return (
     <div className="space-y-16 p-39.6">
       <div>
-        <h1 className="text-3xl pt-10 font-bold text-primary-dark">Welcome back!</h1>
-        <p className="text-text-light mb-5 mt-2">Here's an overview of your activity.</p>
+        <h1 className="text-3xl pt-10 font-bold text-primary-dark">{t('dashboard.welcome')}</h1>
+        <p className="text-text-light mb-5 mt-2">{t('dashboard.overview')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -50,7 +52,7 @@ const ClientDashboard = () => {
             <BookOpen size={24} />
           </div>
           <div>
-            <p className="text-sm font-medium text-text-light">Total Bookings</p>
+            <p className="text-sm font-medium text-text-light">{t('dashboard.totalBookings')}</p>
             <p className="text-2xl font-bold text-primary-dark">{stats.totalBookings}</p>
           </div>
         </div>
@@ -60,7 +62,7 @@ const ClientDashboard = () => {
             <Clock size={24} />
           </div>
           <div>
-            <p className="text-sm font-medium text-text-light">Pending Requests</p>
+            <p className="text-sm font-medium text-text-light">{t('dashboard.pendingRequests')}</p>
             <p className="text-2xl font-bold text-primary-dark">{stats.pending}</p>
           </div>
         </div>
@@ -70,7 +72,7 @@ const ClientDashboard = () => {
             <CheckCircle size={24} />
           </div>
           <div>
-            <p className="text-sm font-medium text-text-light">Completed</p>
+            <p className="text-sm font-medium text-text-light">{t('dashboard.completed')}</p>
             <p className="text-2xl font-bold text-primary-dark">{stats.completed}</p>
           </div>
         </div>
@@ -78,18 +80,18 @@ const ClientDashboard = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-primary-dark">Recent Bookings</h2>
-          <button className="text-accent-orange font-bold text-sm hover:underline">View All</button>
+          <h2 className="text-xl font-bold text-primary-dark">{t('dashboard.recentBookings')}</h2>
+          <button className="text-accent-orange font-bold text-sm hover:underline">{t('dashboard.viewAll')}</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-50 text-text-light uppercase text-xs font-bold">
               <tr>
-                <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Reference</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4">Date</th>
+                <th className="px-6 py-4">{t('dashboard.type')}</th>
+                <th className="px-6 py-4">{t('dashboard.reference')}</th>
+                <th className="px-6 py-4">{t('dashboard.status')}</th>
+                <th className="px-6 py-4">{t('dashboard.amount')}</th>
+                <th className="px-6 py-4">{t('dashboard.date')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -113,7 +115,7 @@ const ClientDashboard = () => {
               ))}
               {recentBookings.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-text-light italic">No bookings found</td>
+                  <td colSpan={5} className="px-6 py-10 text-center text-text-light italic">{t('dashboard.noBookings')}</td>
                 </tr>
               )}
             </tbody>

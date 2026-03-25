@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import api from '../../../services/api';
 import { Link } from 'react-router-dom';
-import { MapPin, Star, Tag, ChevronRight, Camera, X, Maximize2 } from 'lucide-react';
+import { MapPin, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import ImageGallery from '../../common/ImageGallery';
 
 const FeaturedListings = () => {
+  const { t } = useTranslation();
   const [featured, setFeatured] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,14 +60,14 @@ const FeaturedListings = () => {
         <div>
           <div className="flex items-center gap-2 text-accent-orange font-black text-[10px] uppercase tracking-widest">
             <span className="w-6 h-0.5 bg-accent-orange rounded-full"></span>
-            Our Recommendations
+            {t('home.recommendations')}
           </div>
           <h2 className="text-3xl font-black text-primary-dark tracking-tighter uppercase leading-none">
-            Featured <span className="text-accent-orange font-mono">Accommodations</span>
+            {t('home.featuredAccommodations')}
           </h2>
         </div>
         <Link to="/accommodations" className="group flex items-center gap-2 text-primary-dark font-black uppercase text-[10px] tracking-widest hover:text-accent-orange transition-colors">
-          Explore All
+          {t('home.exploreAll')}
           <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
@@ -108,7 +110,7 @@ const FeaturedListings = () => {
 
                 <div className="text-right mb-4">
                     <p className="text-accent-orange font-mono font-bold text-2xl">Rwf {price?.toLocaleString()}</p>
-                    <p className="text-xs text-text-light -mt-1">/ per night</p>
+                    <p className="text-xs text-text-light -mt-1">{t('home.perNight')}</p>
                 </div>
 
                 <div className="mt-auto">
@@ -116,7 +118,7 @@ const FeaturedListings = () => {
                     to={`/accommodations/${item.id}`} 
                     className="w-full inline-block text-center py-3 bg-gray-50 text-primary-dark font-black rounded-xl hover:bg-primary-dark hover:text-white transition-all duration-300 uppercase text-xs tracking-widest border border-gray-100 shadow-sm"
                   >
-                    View Details
+                    {t('home.viewDetails')}
                   </Link>
                 </div>
               </div>

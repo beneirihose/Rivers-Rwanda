@@ -15,7 +15,7 @@ const sanitizeAccommodationData = (body: any, imagePaths: string[] | null) => {
 
     // Process boolean fields
     const boolFields = [
-        'wifi', 'parking', 'garden', 'decoration', 'gym', 'kitchen', 
+        'wifi', 'parking', 'garden', 'decoration', 'sonolization', 'gym', 'kitchen', 
         'toilet', 'living_room', 'swimming_pool', 'has_elevator', 'is_furnished'
     ];
     boolFields.forEach(field => {
@@ -25,7 +25,7 @@ const sanitizeAccommodationData = (body: any, imagePaths: string[] | null) => {
     });
 
     // Process numeric fields - Ensure empty strings are converted to null for MySQL
-    const numericFields = ['max_guests', 'capacity', 'floor_number'];
+    const numericFields = ['floor_number', 'number_of_living_rooms'];
     numericFields.forEach(field => {
         if (body[field] !== undefined) {
             const val = parseInt(body[field]);

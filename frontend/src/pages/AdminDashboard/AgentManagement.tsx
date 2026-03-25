@@ -209,7 +209,7 @@ const AgentManagement = () => {
           <h4 className="font-black text-primary-dark uppercase text-sm tracking-tight">Agent Privileges</h4>
           <p className="text-xs text-text-light mt-1 font-medium max-w-2xl leading-relaxed">
             Approved agents are permitted to process bookings on behalf of clients. For every successfully verified payment, 
-            the system automatically credits the agent with a <span className="text-accent-orange font-bold">5% commission fee</span>. 
+            the system automatically credits the agent with a <span className="text-accent-orange font-bold">3% commission fee</span>. 
             Ensure all National ID details are verified before approval.
           </p>
         </div>

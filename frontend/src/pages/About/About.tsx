@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion';
 import { Check, Star, Users, Phone, Building, Home, HeartHandshake, BookKey, ArrowRight, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const About = () => {
+  const { t } = useTranslation();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -21,7 +24,7 @@ const About = () => {
 
   return (
     <div className="bg-white overflow-hidden min-h-screen">
-      {/* Hero Section - Updated to White Background */}
+      {/* Hero Section */}
       <section className="relative pt-44 pb-32 text-center bg-white">
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
@@ -30,24 +33,19 @@ const About = () => {
             transition={{ duration: 0.8 }}
           >
             <span className="inline-block bg-accent-orange px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.4em] mb-8 text-white shadow-xl">
-              ABOUT US
+              {t('about.badge')}
             </span>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 uppercase leading-[0.9] text-primary-dark">
-              Your Trusted Gateway to <br />
-              <span className="text-accent-orange">Comfort & Style</span>
+              {t('about.heroTitle')} <br />
+              <span className="text-accent-orange">{t('about.heroTitleAccent')}</span>
             </h1>
             <div className="max-w-4xl mx-auto space-y-6 text-gray-500 text-lg md:text-xl font-medium leading-relaxed text-justify">
-              <p>
-                At Rivers Rwanda, we make finding the perfect place to stay or celebrate easy, secure, and enjoyable. Whether you're looking for a luxurious hotel room, a short-term apartment or apartment to buy, a family house for rent, or the ideal venue for your dream wedding, Rivers Rwanda brings it all together in one seamless platform.
-              </p>
-              <p>
-                We partner with trusted property owners and venue providers to offer you a wide range of carefully selected spaces that combine comfort, elegance, and affordability. With just a few clicks, you can explore, compare, and book the perfect space — wherever your journey takes you.
-              </p>
+              <p>{t('about.para1')}</p>
+              <p>{t('about.para2')}</p>
             </div>
           </motion.div>
         </div>
         
-        {/* Subtle Decorative Element */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden -z-10">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-orange/5 rounded-full blur-[120px]"></div>
             <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-primary-dark/5 rounded-full blur-[100px]"></div>
@@ -65,24 +63,29 @@ const About = () => {
             className="space-y-10"
           >
             <div>
-              <span className="text-accent-orange font-black text-[11px] uppercase tracking-[0.3em] mb-4 block">Our Mission</span>
-              <h2 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tighter uppercase leading-none mb-8">Connecting People to Spaces</h2>
+              <span className="text-accent-orange font-black text-[11px] uppercase tracking-[0.3em] mb-4 block">{t('about.missionBadge')}</span>
+              <h2 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tighter uppercase leading-none mb-8">{t('about.missionTitle')}</h2>
               <p className="text-2xl md:text-3xl font-bold text-primary-dark/90 leading-snug italic border-l-[12px] border-accent-orange pl-8 py-4 bg-gray-50/50 rounded-r-3xl text-justify">
-                "We connect travelers and event planners with reliable, beautiful, and affordable spaces across the region."
+                "{t('about.missionQuote')}"
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-              {['Verified Properties', 'Easy Booking', 'Wedding Planning', '24/7 Support'].map((item, i) => (
+              {[
+                { label: t('about.verifiedProperties'), icon: <Check size={16} strokeWidth={4} /> },
+                { label: t('about.easyBooking'), icon: <Check size={16} strokeWidth={4} /> },
+                { label: t('about.weddingPlanning'), icon: <Check size={16} strokeWidth={4} /> },
+                { label: t('about.support247'), icon: <Check size={16} strokeWidth={4} /> }
+              ].map((item, i) => (
                 <motion.div 
                   key={i} 
                   whileHover={{ x: 10, backgroundColor: '#fff7ed' }}
                   className="flex items-center gap-4 font-black text-primary-dark text-[11px] uppercase tracking-[0.2em] p-4 border border-gray-100 rounded-2xl transition-all"
                 >
                   <div className="bg-accent-orange text-white p-2 rounded-lg shadow-md shadow-accent-orange/20">
-                    <Check size={16} strokeWidth={4} />
+                    {item.icon}
                   </div>
-                  {item}
+                  {item.label}
                 </motion.div>
               ))}
             </div>
@@ -116,8 +119,8 @@ const About = () => {
             viewport={{ once: true }}
             className="mb-20"
           >
-            <span className="text-accent-orange font-black text-[11px] uppercase tracking-[0.4em] mb-4 block">What We Offer</span>
-            <h2 className="text-4xl md:text-6xl font-black text-primary-dark tracking-tighter uppercase">Our Services</h2>
+            <span className="text-accent-orange font-black text-[11px] uppercase tracking-[0.4em] mb-4 block">{t('about.offerBadge')}</span>
+            <h2 className="text-4xl md:text-6xl font-black text-primary-dark tracking-tighter uppercase">{t('about.offerTitle')}</h2>
           </motion.div>
 
           <motion.div
@@ -128,10 +131,10 @@ const About = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
           >
             {[
-              { icon: <Building size={36}/>, title: 'Hotels', desc: 'Comfortable, stylish stays for every trip.' },
-              { icon: <Home size={36}/>, title: 'Apartments & Houses', desc: 'Feel at home, even away from home.' },
-              { icon: <HeartHandshake size={36}/>, title: 'Wedding Venues', desc: 'Celebrate love in the perfect setting.' },
-              { icon: <BookKey size={36}/>, title: 'Secure Booking', desc: 'Easy, fast, and safe reservations.' }
+              { icon: <Building size={36}/>, title: t('about.hotels'), desc: t('about.hotelsDesc') },
+              { icon: <Home size={36}/>, title: t('about.apartments'), desc: t('about.apartmentsDesc') },
+              { icon: <HeartHandshake size={36}/>, title: t('about.weddingVenues'), desc: t('about.weddingVenuesDesc') },
+              { icon: <BookKey size={36}/>, title: t('about.secureBooking'), desc: t('about.secureBookingDesc') }
             ].map((service, i) => (
               <motion.div 
                 key={i} 
@@ -150,7 +153,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Benefits Section - Updated to White Background */}
+      {/* Benefits Section */}
       <section className="py-32 bg-white">
         <div className="container mx-auto px-6 text-center">
           <motion.div 
@@ -159,8 +162,8 @@ const About = () => {
             viewport={{ once: true }}
             className="mb-20"
           >
-            <span className="text-accent-orange font-black text-[11px] uppercase tracking-[0.4em] mb-4 block">Why Choose Rivers Rwanda</span>
-            <h2 className="text-4xl md:text-6xl font-black text-primary-dark tracking-tighter uppercase">The Benefits Of Working With Our Team</h2>
+            <span className="text-accent-orange font-black text-[11px] uppercase tracking-[0.4em] mb-4 block">{t('about.benefitsBadge')}</span>
+            <h2 className="text-4xl md:text-6xl font-black text-primary-dark tracking-tighter uppercase">{t('about.benefitsTitle')}</h2>
           </motion.div>
 
           <motion.div
@@ -171,12 +174,12 @@ const About = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {[
-              { icon: <Star size={24}/>, title: 'Curated Listings', desc: 'We handpick every property to ensure quality and comfort.' },
-              { icon: <Users size={24}/>, title: 'Verified Hosts', desc: 'All our property owners are thoroughly vetted for your peace of mind.' },
-              { icon: <Phone size={24}/>, title: '24/7 Support', desc: 'Our customer service team is always available to assist you.' },
-              { icon: <Check size={24}/>, title: 'Transparent Pricing', desc: 'No hidden fees - you see the full price upfront.' },
-              { icon: <ArrowRight size={24}/>, title: 'Instant Booking', desc: 'Many properties allow immediate confirmation of your reservation.' },
-              { icon: <MapPin size={24}/>, title: 'Prime Locations', desc: 'Properties in the most convenient and desirable areas.' }
+              { icon: <Star size={24}/>, title: t('about.curatedListings'), desc: t('about.curatedDesc') },
+              { icon: <Users size={24}/>, title: t('about.verifiedHosts'), desc: t('about.verifiedHostsDesc') },
+              { icon: <Phone size={24}/>, title: t('about.support247'), desc: t('about.supportDesc') },
+              { icon: <Check size={24}/>, title: t('about.transparentPricing'), desc: t('about.transparentDesc') },
+              { icon: <ArrowRight size={24}/>, title: t('about.instantBooking'), desc: t('about.instantDesc') },
+              { icon: <MapPin size={24}/>, title: t('about.primeLocations'), desc: t('about.locationsDesc') }
             ].map((benefit, i) => (
               <motion.div 
                 key={i} 
@@ -199,7 +202,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Simple Modern Footer Accent */}
       <div className="container mx-auto px-6 pb-20">
         <div className="h-px bg-gradient-to-r from-transparent via-gray-100 to-transparent w-full"></div>
       </div>

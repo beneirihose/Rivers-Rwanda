@@ -1,11 +1,11 @@
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Wifi, Car, TreePine, Paintbrush, Building2, ArrowUpCircle, Sofa, X, Image as ImageIcon, Dumbbell, Utensils, Bath, Tv, Waves } from 'lucide-react';
+import { Wifi, Car, TreePine, Paintbrush, ArrowUpCircle, Sofa, X, Image as ImageIcon, Dumbbell, Utensils, Bath, Tv, Waves, Volume2 } from 'lucide-react';
 
 const rwandaDistricts = [
   "Gasabo", "Kicukiro", "Nyarugenge", // Kigali
@@ -26,15 +26,15 @@ const schema = z.object({
   price_per_night: z.preprocess(val => val ? Number(val) : undefined, z.number().positive().optional()),
   price_per_event: z.preprocess(val => val ? Number(val) : undefined, z.number().positive().optional()),
   sale_price: z.preprocess(val => val ? Number(val) : undefined, z.number().positive().optional()),
-  max_guests: z.preprocess(val => val ? Number(val) : undefined, z.number().positive().optional()),
-  capacity: z.preprocess(val => val ? Number(val) : undefined, z.number().positive().optional()),
   floor_number: z.preprocess(val => val ? Number(val) : undefined, z.number().optional()),
   room_name_number: z.string().optional(),
   bed_type: z.enum(['single', 'double', 'triple', 'other']).optional(),
+  number_of_living_rooms: z.preprocess(val => val ? Number(val) : undefined, z.number().positive().optional()),
   wifi: z.boolean().optional(),
   parking: z.boolean().optional(),
   garden: z.boolean().optional(),
   decoration: z.boolean().optional(),
+  sonolization: z.boolean().optional(),
   gym: z.boolean().optional(),
   kitchen: z.boolean().optional(),
   toilet: z.boolean().optional(),
@@ -58,7 +58,7 @@ const AddAccommodationForm = () => {
   const [loading, setLoading] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   
-  const { register, handleSubmit, watch, control, setValue, formState: { errors } } = useForm({ 
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<z.infer<typeof schema>>({ 
     resolver: zodResolver(schema), 
     defaultValues: { 
         type: 'apartment',
@@ -69,6 +69,7 @@ const AddAccommodationForm = () => {
         parking: false,
         garden: false,
         decoration: false,
+        sonolization: false,
         gym: false,
         kitchen: false,
         toilet: false,
@@ -76,7 +77,7 @@ const AddAccommodationForm = () => {
         swimming_pool: false,
         has_elevator: false,
         is_furnished: false,
-        images: null
+        images: null as any
     } 
   });
   
@@ -190,37 +191,32 @@ const AddAccommodationForm = () => {
             </div>
         </div>
 
-        {/* Pricing & Capacity */}
+        {/* Pricing */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-gray-50 rounded-[2rem] border border-gray-100">
             {type === 'event_hall' ? (
-                <>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price per Event (RWF)</label>
-                        <input type="number" {...register('price_per_event')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Guest Capacity</label>
-                        <input type="number" {...register('capacity')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
-                    </div>
-                </>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price Per Event (Rwf)</label>
+                    <input type="number" {...register('price_per_event')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
+                </div>
+            ) : type === 'hotel_room' ? (
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price Per Night (Rwf)</label>
+                    <input type="number" {...register('price_per_night')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
+                </div>
             ) : (
                 <>
-                    {(purpose === 'rent' || purpose === 'both' || type === 'hotel_room') && (
+                    {(purpose === 'rent' || purpose === 'both') && (
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price per Night (RWF)</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price Per Night (Rwf)</label>
                             <input type="number" {...register('price_per_night')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
                         </div>
                     )}
-                    {(purpose === 'sale' || purpose === 'both') && type === 'apartment' && (
+                    {(purpose === 'sale' || purpose === 'both') && (
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sale Price (RWF)</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sale Price (Rwf)</label>
                             <input type="number" {...register('sale_price')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
                         </div>
                     )}
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Max Guests</label>
-                        <input type="number" {...register('max_guests')} className="w-full p-4 border-2 border-white rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none shadow-sm" />
-                    </div>
                 </>
             )}
         </div>
@@ -251,22 +247,28 @@ const AddAccommodationForm = () => {
                 </>
             )}
             {type === 'apartment' && (
-                <div className="flex flex-col md:flex-row gap-6 items-center">
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <input type="checkbox" {...register('has_elevator')} className="hidden" />
-                        <div className={`p-3 rounded-xl border-2 transition-all ${watch('has_elevator') ? 'bg-accent-orange border-accent-orange text-white' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
-                            <ArrowUpCircle size={20} />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Has Elevator</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <input type="checkbox" {...register('is_furnished')} className="hidden" />
-                        <div className={`p-3 rounded-xl border-2 transition-all ${watch('is_furnished') ? 'bg-accent-orange border-accent-orange text-white' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
-                            <Sofa size={20} />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Fully Furnished</span>
-                    </label>
-                </div>
+                <>
+                    <div className="flex flex-col md:flex-row gap-6 items-center">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" {...register('has_elevator')} className="hidden" />
+                            <div className={`p-3 rounded-xl border-2 transition-all ${watch('has_elevator') ? 'bg-accent-orange border-accent-orange text-white' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
+                                <ArrowUpCircle size={20} />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Has Elevator</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" {...register('is_furnished')} className="hidden" />
+                            <div className={`p-3 rounded-xl border-2 transition-all ${watch('is_furnished') ? 'bg-accent-orange border-accent-orange text-white' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
+                                <Sofa size={20} />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Fully Furnished</span>
+                        </label>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Number of Living Rooms</label>
+                        <input type="number" min={0} {...register('number_of_living_rooms')} className="w-full p-4 border-2 border-gray-100 rounded-2xl font-bold text-primary-dark focus:border-accent-orange outline-none transition-all bg-gray-50" />
+                    </div>
+                </>
             )}
         </div>
 
@@ -274,17 +276,31 @@ const AddAccommodationForm = () => {
         <div className="space-y-6">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Features & Amenities</label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
+                {(type === 'event_hall' ? [
+                    { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> },
+                    { id: 'parking', label: 'Parking', icon: <Car size={20}/> },
+                    { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> },
+                    { id: 'decoration', label: 'Decoration', icon: <Paintbrush size={20}/> },
+                    { id: 'sonolization', label: 'Sonolization', icon: <Volume2 size={20}/> },
+                ] : type === 'hotel_room' ? [
                     { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> },
                     { id: 'parking', label: 'Parking', icon: <Car size={20}/> },
                     { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> },
                     { id: 'gym', label: 'Gym', icon: <Dumbbell size={20}/> },
                     { id: 'kitchen', label: 'Kitchen', icon: <Utensils size={20}/> },
-                    { id: 'toilet', label: 'Toilet', icon: <Bath size={20}/> },
+                    { id: 'toilet', label: 'Bathroom', icon: <Bath size={20}/> },
                     { id: 'living_room', label: 'Living Room', icon: <Tv size={20}/> },
                     { id: 'swimming_pool', label: 'Pool', icon: <Waves size={20}/> },
-                    { id: 'decoration', label: 'Decoration', icon: <Paintbrush size={20}/> },
-                ].map(feat => (
+                ] : [
+                    { id: 'wifi', label: 'WiFi', icon: <Wifi size={20}/> },
+                    { id: 'parking', label: 'Parking', icon: <Car size={20}/> },
+                    { id: 'garden', label: 'Garden', icon: <TreePine size={20}/> },
+                    { id: 'gym', label: 'Gym', icon: <Dumbbell size={20}/> },
+                    { id: 'kitchen', label: 'Kitchen', icon: <Utensils size={20}/> },
+                    { id: 'toilet', label: 'Bathroom', icon: <Bath size={20}/> },
+                    { id: 'living_room', label: 'Living Room', icon: <Tv size={20}/> },
+                    { id: 'swimming_pool', label: 'Pool', icon: <Waves size={20}/> },
+                ]).map(feat => (
                     <label key={feat.id} className="cursor-pointer group">
                         <input type="checkbox" {...register(feat.id as any)} className="hidden" />
                         <div className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${watch(feat.id as any) ? 'bg-accent-orange border-accent-orange text-white' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>

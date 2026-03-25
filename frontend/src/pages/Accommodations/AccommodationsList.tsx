@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { Link, useLocation } from 'react-router-dom';
-import { MapPin, Tag, Star, Search, Building2, LayoutGrid, Home } from 'lucide-react';
+import { MapPin, Tag, Star, Search, Building2, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const AccommodationsList = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   
@@ -85,6 +87,18 @@ const AccommodationsList = () => {
     "Karongi", "Ngororero", "Nyabihu", "Nyamasheke", "Rubavu", "Rusizi", "Rutsiro" // West
   ].sort();
 
+  const getPageTitle = () => {
+    if (filters.sub_type) {
+      return filters.sub_type === 'whole' ? t('nav.wholeApartment') : t('nav.apartmentRoom');
+    }
+    if (filters.type) {
+        if (filters.type === 'apartment') return t('accommodations.apartment') + 's';
+        if (filters.type === 'hotel_room') return t('nav.hotelRooms');
+        if (filters.type === 'event_hall') return t('nav.eventHalls');
+    }
+    return t('nav.accommodations');
+  };
+
   return (
     <div className=" min-h-screen pb-18 pt-39">
       {/* Premium Hero Section */}
@@ -107,15 +121,15 @@ const AccommodationsList = () => {
           >
 
             <span className="inline-block mb-2 bg-accent-orange text-white text-sm font-black uppercase tracking-[0.3em] px-8 py-4 rounded-full shadow-2xl shadow-accent-orange/20">
-              PRIME REAL ESTATE & PREMIUM RENTALS
+              {t('accommodations.badge')}
             </span>
 
             <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-none">
-              {filters.sub_type ? filters.sub_type.replace('_', ' ') : (filters.type ? filters.type.replace('_', ' ') + 's' : 'ACCOMMODATIONS')}
+              {getPageTitle()}
             </h1>
 
             <p className="max-w-2xl -button-2 mx-auto text-gray-300 font-medium text-sm md:text-lg leading-relaxed">
-              From luxury apartments in the heart of Kigali to exclusive event halls and boutique hotel rooms. Discover the perfect stay with Rivers Rwanda.
+              {t('accommodations.heroSubtitle')}
             </p>
           </motion.div>
         </div>
@@ -134,14 +148,14 @@ const AccommodationsList = () => {
                   <MapPin size={20} />
                 </div>
                 <div className="flex-1">
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Location</span>
+                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('home.searchLocation')}</span>
                   <select
                     name="city"
                     value={filters.city}
                     onChange={handleFilterChange}
                     className="w-full bg-transparent outline-none font-black text-primary-dark uppercase text-xs cursor-pointer"
                   >
-                    <option value="">Where to?</option>
+                    <option value="">{t('accommodations.whereTo')}</option>
                     {rwandaDistricts.map(district => (
                       <option key={district} value={district}>{district}</option>
                     ))}
@@ -154,17 +168,17 @@ const AccommodationsList = () => {
                   <Building2 size={20} />
                 </div>
                 <div className="flex-1">
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Property Type</span>
+                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('accommodations.propertyType')}</span>
                   <select
                     name="type"
                     value={filters.type}
                     onChange={handleFilterChange}
                     className="w-full bg-transparent outline-none font-black text-primary-dark uppercase text-xs cursor-pointer"
                   >
-                    <option value="">All Types</option>
-                    <option value="apartment">Apartment</option>
-                    <option value="hotel_room">Hotel Room</option>
-                    <option value="event_hall">Event Hall</option>
+                    <option value="">{t('accommodations.allTypes')}</option>
+                    <option value="apartment">{t('accommodations.apartment')}</option>
+                    <option value="hotel_room">{t('accommodations.hotelRoom')}</option>
+                    <option value="event_hall">{t('accommodations.eventHall')}</option>
                   </select>
                 </div>
               </div>
@@ -172,19 +186,19 @@ const AccommodationsList = () => {
               {filters.type === 'apartment' && (
                 <div className="flex items-center gap-4 group border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-8">
                     <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
-                    <LayoutGrid size={20} />
+                    <Tag size={20} />
                     </div>
                     <div className="flex-1">
-                    <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Category</span>
+                    <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('accommodations.category')}</span>
                     <select
                         name="sub_type"
                         value={filters.sub_type}
                         onChange={handleFilterChange}
                         className="w-full bg-transparent outline-none font-black text-primary-dark uppercase text-xs cursor-pointer"
                     >
-                        <option value="">All Categories</option>
-                        <option value="whole">Whole Apartment</option>
-                        <option value="room">Apartment Room</option>
+                        <option value="">{t('accommodations.allCategories')}</option>
+                        <option value="whole">{t('nav.wholeApartment')}</option>
+                        <option value="room">{t('nav.apartmentRoom')}</option>
                     </select>
                     </div>
                 </div>
@@ -195,16 +209,16 @@ const AccommodationsList = () => {
                   <Tag size={20} />
                 </div>
                 <div className="flex-1">
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Purpose</span>
+                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('accommodations.purpose')}</span>
                   <select
                     name="purpose"
                     value={filters.purpose}
                     onChange={handleFilterChange}
                     className="w-full bg-transparent outline-none font-black text-primary-dark uppercase text-xs cursor-pointer"
                   >
-                    <option value="">Any Purpose</option>
-                    <option value="rent">For Rent</option>
-                    <option value="sale">For Sale</option>
+                    <option value="">{t('accommodations.anyPurpose')}</option>
+                    <option value="rent">{t('nav.forRent')}</option>
+                    <option value="sale">{t('nav.forSale')}</option>
                   </select>
                 </div>
               </div>
@@ -214,13 +228,13 @@ const AccommodationsList = () => {
                   <Tag size={20} />
                 </div>
                 <div className="flex-1">
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Max Budget</span>
+                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('accommodations.maxBudget')}</span>
                   <input
                     type="number"
                     name="maxPrice"
                     value={filters.maxPrice}
                     onChange={handleFilterChange}
-                    placeholder="Budget (Rwf)"
+                    placeholder={t('accommodations.budgetPlaceholder')}
                     className="w-full bg-transparent outline-none font-black text-primary-dark uppercase text-xs placeholder:uppercase"
                   />
                 </div>
@@ -232,7 +246,7 @@ const AccommodationsList = () => {
               onClick={fetchAccommodations}
               className="bg-primary-dark text-white px-10 py-5 rounded-[2.5rem] font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 hover:bg-accent-orange transition-all shadow-xl active:scale-95 w-full md:w-auto"
             >
-              <Search size={18} strokeWidth={3} /> Search
+              <Search size={18} strokeWidth={3} /> {t('accommodations.search')}
             </button>
           </motion.div>
         </div>
@@ -280,14 +294,14 @@ const AccommodationsList = () => {
                         />
                       </div>
                       <div className="absolute top-8 left-8 bg-primary-dark/90 backdrop-blur-md text-white text-[10px] font-black uppercase px-4 py-2 rounded-full border border-white/10 tracking-widest shadow-xl flex items-center gap-2">
-                        {item.type.replace('_', ' ')}
-                        {item.sub_type && <span className="opacity-60 text-[8px]">({item.sub_type})</span>}
+                        {t(`accommodations.${item.type}`)}
+                        {item.sub_type && <span className="opacity-60 text-[8px]">({t(`nav.${item.sub_type === 'whole' ? 'wholeApartment' : 'apartmentRoom'}`)})</span>}
                       </div>
                        <div className="absolute bottom-8 right-8 p-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                         <div className="bg-accent-orange text-white px-6 py-3 rounded-2xl font-black text-sm shadow-2xl uppercase tracking-tighter">
                           Rwf {price?.toLocaleString()}
                           <span className="font-bold normal-case text-white/80 ml-1">
-                            {item.price_per_night ? '/ night' : item.price_per_event ? '/ event' : ''}
+                            {item.price_per_night ? t('home.perNight') : item.price_per_event ? t('accommodations.perEvent') : ''}
                           </span>
                         </div>
                       </div>
@@ -297,7 +311,7 @@ const AccommodationsList = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex flex-col">
                            <h3 className="text-2xl font-black text-primary-dark uppercase tracking-tighter truncate">{item.name}</h3>
-                           {item.room_name_number && <span className="text-[10px] font-bold text-accent-orange uppercase">Room: {item.room_name_number}</span>}
+                           {item.room_name_number && <span className="text-[10px] font-bold text-accent-orange uppercase">{t('accommodations.room')}: {item.room_name_number}</span>}
                         </div>
                         <div className="flex text-accent-orange gap-0.5">
                           {[1,2,3,4,5].map(s => <Star key={s} size={12} fill="currentColor" />)}
@@ -314,13 +328,13 @@ const AccommodationsList = () => {
                           to={`/accommodations/${item.id}`}
                           className="flex-1 text-center py-4 border-2 border-primary-dark text-primary-dark font-black rounded-2xl hover:bg-primary-dark hover:text-white transition-all duration-500 uppercase text-[10px] tracking-widest"
                         >
-                          Details
+                          {t('home.viewDetails')}
                         </Link>
                         <Link
                           to={`/accommodations/${item.id}`}
                           className="flex-[2] text-center py-4 bg-accent-orange text-white font-black rounded-2xl hover:bg-primary-dark transition-all duration-500 uppercase text-[10px] tracking-widest shadow-xl shadow-accent-orange/20 active:scale-95"
                         >
-                          Book Now
+                          {t('accommodations.bookNow')}
                         </Link>
                       </div>
                     </div>
@@ -332,12 +346,12 @@ const AccommodationsList = () => {
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Building2 size={40} className="text-gray-300" />
                 </div>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">No accommodations found matching your criteria.</p>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">{t('accommodations.noResults')}</p>
                 <button 
                   onClick={() => setFilters({type: '', sub_type: '', city: '', maxPrice: '', purpose: ''})}
                   className="mt-6 bg-accent-orange text-white px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg hover:bg-primary-dark transition-all"
                 >
-                  Clear all filters
+                  {t('accommodations.clearFilters')}
                 </button>
               </div>
             )}

@@ -50,17 +50,23 @@ export const getCommissionsBySellerId = async (sellerId: string): Promise<Commis
 };
 
 export const getAgentStats = async (agentId: string): Promise<any> => {
-  const totalEarnedSql = 'SELECT SUM(amount) as totalEarned FROM commissions WHERE agent_id = ? AND commission_type = "agent" AND status IN ("paid", "completed")';
-  const pendingSql = 'SELECT SUM(amount) as totalPending FROM commissions WHERE agent_id = ? AND commission_type = "agent" AND status IN ("pending", "approved")';
+  const sumSql = `
+    SELECT 
+      SUM(CASE WHEN status IN ('paid', 'completed') THEN amount ELSE 0 END) as paid,
+      SUM(CASE WHEN status = 'approved' THEN amount ELSE 0 END) as approved,
+      SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) as pending
+    FROM commissions 
+    WHERE agent_id = ? AND commission_type = 'agent'
+  `;
   const clientsSql = 'SELECT COUNT(DISTINCT client_id) as totalClients FROM bookings WHERE agent_id = ?';
   
-  const [totalEarnedResult] = await query<any[]>(totalEarnedSql, [agentId]);
-  const [pendingResult] = await query<any[]>(pendingSql, [agentId]);
+  const [sumResult] = await query<any[]>(sumSql, [agentId]);
   const [clientsResult] = await query<any[]>(clientsSql, [agentId]);
 
   return {
-    totalEarned: totalEarnedResult.totalEarned || 0,
-    totalPending: pendingResult.totalPending || 0,
+    paid: Number(sumResult.paid) || 0,
+    approved: Number(sumResult.approved) || 0,
+    pending: Number(sumResult.pending) || 0,
     totalClients: clientsResult.totalClients || 0,
   };
 };

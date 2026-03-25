@@ -371,9 +371,33 @@ export const verifyBookingPayment = async (req: Request, res: Response, next: Ne
     // 4. Calculate Commissions
     const totalAmount = Number(booking.total_amount);
     
-    // Agent Commission (5%)
+    // Seller Payout (90%) - Only if associated with a seller
+    let sellerId = null;
+    if (booking.house_id) {
+        const [house] = await query<any[]>('SELECT seller_id FROM houses WHERE id = ?', [booking.house_id]);
+        sellerId = house?.seller_id;
+    } else if (booking.vehicle_id) {
+        const [vehicle] = await query<any[]>('SELECT seller_id FROM vehicles WHERE id = ?', [booking.vehicle_id]);
+        sellerId = vehicle?.seller_id;
+    } else if (booking.accommodation_id) {
+        const [accommodation] = await query<any[]>('SELECT seller_id FROM accommodations WHERE id = ?', [booking.accommodation_id]);
+        sellerId = accommodation?.seller_id;
+    }
+
+    if (sellerId) {
+        const sellerPayout = totalAmount * 0.90;
+        await CommissionModel.createCommission({
+            booking_id: bookingId,
+            amount: sellerPayout,
+            commission_type: 'seller_payout',
+            seller_id: sellerId,
+            status: 'approved'
+        });
+    }
+    
+    // Agent Commission (3%)
     if (booking.agent_id) {
-        const agentCommission = totalAmount * 0.05;
+        const agentCommission = totalAmount * 0.03;
         await CommissionModel.createCommission({
             agent_id: booking.agent_id,
             booking_id: bookingId,
@@ -383,8 +407,8 @@ export const verifyBookingPayment = async (req: Request, res: Response, next: Ne
         });
     }
 
-    // System Fee (10% - Agent 5% if exists)
-    const systemFeeRate = booking.agent_id ? 0.05 : 0.10;
+    // System Fee (10% - Agent 3% if exists)
+    const systemFeeRate = booking.agent_id ? 0.07 : 0.10;
     const systemFee = totalAmount * systemFeeRate;
     await CommissionModel.createCommission({
         booking_id: bookingId,

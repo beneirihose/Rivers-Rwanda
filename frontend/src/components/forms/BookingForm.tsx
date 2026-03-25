@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Banknote, Smartphone, Calendar as CalendarIcon } from 'lucide-react';
 import SuccessModal from '../common/SuccessModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // --- Schema for the form ---
 const schema = z.object({
@@ -25,11 +26,12 @@ const schema = z.object({
 });
 
 const paymentDetails = {
-  bank: { name: 'Bank of Kigali', accountNumber: '0012-3456-7890-1112', accountName: 'Rivers Rwanda Ltd.' },
+  bank: { name: 'I&M Bank', accountNumber: '20151404001', accountName: 'MVL Group Ltd' },
   momo: { number: '0792659094', name: 'Leandre Mukunzi' }
 };
 
 const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehicle' | 'accommodation' }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -65,12 +67,12 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
     if (isHousePurchase) {
       amount = item.purchase_price;
-      label = 'Full Purchase';
+      label = t('booking.fullPurchase');
     } else if (isHouseRent) {
       const monthlyRate = item.monthly_rent_price;
       const months = numMonths || 2;
       amount = monthlyRate * months;
-      label = `${months} Month(s)`;
+      label = `${months} ${t('booking.months')}`;
     } else if (isAccommodation || isVehicleRent) {
       const dailyRate = isAccommodation ? (item.price_per_night || item.price_per_event || 0) : (item.daily_rate || 0);
       
@@ -82,19 +84,19 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
         
         const units = diffDays > 0 ? diffDays : 1;
         amount = dailyRate * units;
-        label = `${units} Day(s) / Night(s)`;
+        label = `${units} ${t('booking.days')}`;
       } else {
         amount = dailyRate;
-        label = '1 Day / Night';
+        label = `1 ${t('booking.day')}`;
       }
     } else if (isVehiclePurchase) {
       amount = item.sale_price;
-      label = 'Full Purchase';
+      label = t('booking.fullPurchase');
     }
 
     setTotalAmount(Math.round(amount));
     setDisplayDuration(label);
-  }, [startDate, endDate, numMonths, item, itemType, isHouseRent, isHousePurchase, isVehicleRent, isVehiclePurchase, isAccommodation]);
+  }, [startDate, endDate, numMonths, item, itemType, isHouseRent, isHousePurchase, isVehicleRent, isVehiclePurchase, isAccommodation, t]);
 
   const onSubmit = async (data: any) => {
     setLoading(true);
@@ -142,13 +144,13 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
       setBookingRef(response.data.data.bookingReference);
       
       if (response.data.data.isAutomatic) {
-          toast.success('Payment successful! Your booking is confirmed.');
+          toast.success(t('booking.successAuto'));
           setTimeout(() => navigate('/client/bookings'), 2000);
       } else {
           setModalOpen(true);
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Booking failed');
+      toast.error(error.response?.data?.message || t('booking.failed'));
     } finally {
       setLoading(false);
     }
@@ -164,44 +166,44 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
   return (
     <>
-      <SuccessModal isOpen={modalOpen} onClose={handleModalClose} title="Success!" message="Booking request received!" reference={bookingRef} />
+      <SuccessModal isOpen={modalOpen} onClose={handleModalClose} title={t('booking.successTitle')} message={t('booking.successMessage')} reference={bookingRef} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="my-6 p-4 bg-black/20 rounded-xl text-center">
           <p className="text-xs font-black text-gray-300 uppercase tracking-widest mb-1">
-            {isHousePurchase || isVehiclePurchase ? 'Purchase Price' : 'Total Amount Due'}
+            {isHousePurchase || isVehiclePurchase ? t('booking.purchasePrice') : t('booking.totalAmount')}
           </p>
           <p className="text-3xl font-black text-white tracking-tighter">
             Rwf {totalAmount?.toLocaleString()}
           </p>
           <p className="text-[10px] font-bold text-accent-orange uppercase tracking-widest mt-1">
-            Based on {displayDuration}
+            {t('booking.basedOn')} {displayDuration}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <input {...register('fullName')} placeholder="Your Full Name" className={inputStyles} />
+            <input {...register('fullName')} placeholder={t('contact.fullName')} className={inputStyles} />
             {errors.fullName && <p className={errorStyles}>{errors.fullName.message as string}</p>}
           </div>
           <div>
-            <input {...register('email')} placeholder="Your Email Address" className={inputStyles} />
+            <input {...register('email')} placeholder={t('auth.emailLabel')} className={inputStyles} />
             {errors.email && <p className={errorStyles}>{errors.email.message as string}</p>}
           </div>
         </div>
         <div>
-          <input {...register('phone')} placeholder="Your Phone Number" className={inputStyles} />
+          <input {...register('phone')} placeholder={t('auth.phoneLabel')} className={inputStyles} />
           {errors.phone && <p className={errorStyles}>{errors.phone.message as string}</p>}
         </div>
 
         {/* --- DYNAMIC DATE/DURATION FIELDS --- */}
         <div className="space-y-4 pt-2 border-t border-white/5 mt-4">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <CalendarIcon size={12} /> Scheduling Details
+                <CalendarIcon size={12} /> {t('booking.schedulingDetails')}
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-1">Start Date / Check-in</label>
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-1">{t('booking.startDate')}</label>
                     <input {...register('startDate')} type="date" className={`${inputStyles} mt-1`} min={new Date().toISOString().split('T')[0]} />
                     {errors.startDate && <p className={errorStyles}>{errors.startDate.message as string}</p>}
                 </div>
@@ -209,8 +211,8 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
                 {/* For House Rent: Number of Months Input */}
                 {isHouseRent && (
                     <div>
-                        <label className="text-[9px] font-black text-gray-400 uppercase ml-1">Rental Duration (Months)</label>
-                        <input {...register('numMonths')} type="number" min="2" placeholder="Min 2 months" className={`${inputStyles} mt-1`} />
+                        <label className="text-[9px] font-black text-gray-400 uppercase ml-1">{t('booking.rentalDuration')}</label>
+                        <input {...register('numMonths')} type="number" min="2" placeholder={t('booking.min2Months')} className={`${inputStyles} mt-1`} />
                         {errors.numMonths && <p className={errorStyles}>{errors.numMonths.message as string}</p>}
                     </div>
                 )}
@@ -218,7 +220,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
                 {/* For Accommodation / Vehicle Rent: End Date */}
                 {(isAccommodation || isVehicleRent) && (
                     <div>
-                        <label className="text-[9px] font-black text-gray-400 uppercase ml-1">End Date / Check-out</label>
+                        <label className="text-[9px] font-black text-gray-400 uppercase ml-1">{t('booking.endDate')}</label>
                         <input {...register('endDate')} type="date" className={`${inputStyles} mt-1`} min={startDate} />
                         {errors.endDate && <p className={errorStyles}>{errors.endDate.message as string}</p>}
                     </div>
@@ -227,17 +229,17 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
         </div>
 
         <div>
-          <label className="text-xs font-bold text-gray-300 uppercase ml-2">Select Payment Method</label>
+          <label className="text-xs font-bold text-gray-300 uppercase ml-2">{t('booking.paymentMethod')}</label>
           <select {...register('payment_method')} className={`${inputStyles} mt-1`}>
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="mobile_money">Mobile Money (MoMo)</option>
+            <option value="bank_transfer">{t('booking.bankTransfer')}</option>
+            <option value="mobile_money">{t('booking.mobileMoney')}</option>
           </select>
         </div>
 
         <div className="p-4 border-2 border-dashed border-accent-orange/30 rounded-xl bg-accent-orange/5 text-white animate-in fade-in">
           <h4 className="font-bold flex items-center gap-2 mb-2 text-accent-orange">
             {paymentMethod === 'bank_transfer' ? <Banknote size={20} /> : <Smartphone size={20} />}
-            Payment Instructions
+            {t('booking.paymentInstructions')}
           </h4>
           {paymentMethod === 'bank_transfer' && (
             <div className="text-sm space-y-1 text-gray-200">
@@ -250,19 +252,19 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
             <div className="text-sm space-y-1 text-gray-200">
               <p><strong>Receiver:</strong> {paymentDetails.momo.name}</p>
               <p><strong>Number:</strong> <span className="font-mono bg-black/30 p-1 rounded">{paymentDetails.momo.number}</span></p>
-              <p className="text-xs mt-2 text-gray-400">Send the total amount to this phone number and upload the confirmation screenshot below.</p>
+              <p className="text-xs mt-2 text-gray-400">{t('booking.momoInstruction')}</p>
             </div>
           )}
         </div>
         
         <div>
-          <label className="text-xs font-bold text-gray-300 uppercase ml-2">Upload Payment Proof</label>
+          <label className="text-xs font-bold text-gray-300 uppercase ml-2">{t('booking.uploadProof')}</label>
           <input {...register('payment_proof')} type="file" accept=".jpg,.jpeg,.png,.pdf" className={`${inputStyles} p-2 mt-1`} />
           {errors.payment_proof && <p className={errorStyles}>{errors.payment_proof.message as string}</p>}
         </div>
         
         <button type="submit" disabled={loading} className="w-full bg-accent-orange text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl relative z-10">
-          {loading ? 'Processing...' : 'Submit Booking & Proof'}
+          {loading ? t('booking.processing') : t('booking.submit')}
         </button>
       </form>
     </>

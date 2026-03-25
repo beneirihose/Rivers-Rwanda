@@ -17,6 +17,7 @@ import {
   Package,
   UserCheck
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Footer from '../Footer/Footer'; // Import the main footer
 
 interface DashboardLayoutProps {
@@ -25,6 +26,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -37,32 +39,32 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
   const menuItems = {
     client: [
-      { label: 'Overview', path: '/client/dashboard', icon: <LayoutDashboard size={20} /> },
-      { label: 'My Bookings', path: '/client/bookings', icon: <BookOpen size={20} /> },
-      { label: 'Profile', path: '/client/profile', icon: <User size={20} /> },
+      { label: t('dashboard.sideNav.overview'), path: '/client/dashboard', icon: <LayoutDashboard size={20} /> },
+      { label: t('dashboard.sideNav.myBookings'), path: '/client/bookings', icon: <BookOpen size={20} /> },
+      { label: t('dashboard.sideNav.profile'), path: '/client/profile', icon: <User size={20} /> },
     ],
     agent: [
-      { label: 'Overview', path: '/agent/dashboard', icon: <LayoutDashboard size={20} /> },
-      { label: 'My Clients', path: '/agent/clients', icon: <UsersIcon size={20} /> },
-      { label: 'Earnings', path: '/agent/earnings', icon: <Banknote size={20} /> },
-      { label: 'Profile', path: '/agent/profile', icon: <User size={20} /> },
+      { label: t('dashboard.sideNav.overview'), path: '/agent/dashboard', icon: <LayoutDashboard size={20} /> },
+      { label: t('dashboard.sideNav.myClients'), path: '/agent/clients', icon: <UsersIcon size={20} /> },
+      { label: t('dashboard.sideNav.earnings'), path: '/agent/earnings', icon: <Banknote size={20} /> },
+      { label: t('dashboard.sideNav.profile'), path: '/agent/profile', icon: <User size={20} /> },
     ],
     seller: [
-      { label: 'Dashboard', path: '/seller/dashboard', icon: <LayoutDashboard size={20} /> },
-      { label: 'My Products', path: '/seller/products', icon: <Package size={20} /> },
-      { label: 'Earnings', path: '/seller/earnings', icon: <Banknote size={20} /> },
-      { label: 'Profile', path: '/seller/profile', icon: <User size={20} /> },
+      { label: t('dashboard.sideNav.overview'), path: '/seller/dashboard', icon: <LayoutDashboard size={20} /> },
+      { label: t('dashboard.sideNav.myProducts'), path: '/seller/products', icon: <Package size={20} /> },
+      { label: t('dashboard.sideNav.earnings'), path: '/seller/earnings', icon: <Banknote size={20} /> },
+      { label: t('dashboard.sideNav.profile'), path: '/seller/profile', icon: <User size={20} /> },
     ],
     admin: [
-      { label: 'Overview', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
-      { label: 'Users', path: '/admin/users', icon: <UsersIcon size={20} /> },
-      { label: 'Agents', path: '/admin/agents', icon: <UserCheck size={20} /> },
-      { label: 'Sellers', path: '/admin/sellers', icon: <ShieldCheck size={20} /> },
-      { label: 'Products', path: '/admin/products', icon: <Package size={20} /> },
-      { label: 'Commissions', path: '/admin/commissions', icon: <Banknote size={20} /> },
-      { label: 'Bookings', path: '/admin/bookings', icon: <BookOpen size={20} /> },
-      { label: 'Inquiries', path: '/admin/inquiries', icon: <MessageSquare size={20} /> },
-      { label: 'Profile', path: '/admin/profile', icon: <User size={20} /> },
+      { label: t('dashboard.sideNav.overview'), path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
+      { label: t('dashboard.sideNav.users'), path: '/admin/users', icon: <UsersIcon size={20} /> },
+      { label: t('dashboard.sideNav.agents'), path: '/admin/agents', icon: <UserCheck size={20} /> },
+      { label: t('dashboard.sideNav.sellers'), path: '/admin/sellers', icon: <ShieldCheck size={20} /> },
+      { label: t('dashboard.sideNav.products'), path: '/admin/products', icon: <Package size={20} /> },
+      { label: t('dashboard.sideNav.commissions'), path: '/admin/commissions', icon: <Banknote size={20} /> },
+      { label: t('dashboard.sideNav.bookings'), path: '/admin/bookings', icon: <BookOpen size={20} /> },
+      { label: t('dashboard.sideNav.inquiries'), path: '/admin/inquiries', icon: <MessageSquare size={20} /> },
+      { label: t('dashboard.sideNav.profile'), path: '/admin/profile', icon: <User size={20} /> },
     ],
   };
 
@@ -70,7 +72,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-white/10 h-20 flex items-center">
         <h3 className="text-xl font-bold tracking-wider text-accent-orange uppercase">
-          {role} PANEL
+          {t(`dashboard.sideNav.roles.${role}`)} {t('dashboard.sideNav.panel')}
         </h3>
       </div>
       <nav className="flex-grow p-4 overflow-y-auto">
@@ -80,7 +82,8 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               <Link 
                 to={item.path} 
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${                  location.pathname.startsWith(item.path) 
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  location.pathname.startsWith(item.path) 
                     ? 'bg-accent-orange text-white shadow-lg' 
                     : 'hover:bg-white/10 text-gray-300 hover:text-white'
                 }`}
@@ -98,14 +101,14 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-all duration-200"
         >
           <Globe size={20} />
-          <span className="font-medium">Back to Main Site</span>
+          <span className="font-medium">{t('dashboard.sideNav.backToMain')}</span>
         </Link>
         <button 
           onClick={handleLogout} 
           className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-300 hover:bg-red-500 hover:text-white transition-all duration-200"
         >
           <LogOut size={20} />
-          <span className="font-medium">Logout</span>
+          <span className="font-medium">{t('dashboard.sideNav.logout')}</span>
         </button>
       </div>
     </div>

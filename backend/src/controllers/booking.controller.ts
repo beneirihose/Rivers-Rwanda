@@ -58,11 +58,11 @@ async function processConfirmedBooking(bookingId: string) {
     // 3. Commissions
     const totalAmount = Number(booking.total_amount);
     
-    // Agent Commission (5%)
+    // Agent Commission (3%)
     if (booking.agent_id) {
         const [agent] = await query<any[]>('SELECT status FROM agents WHERE id = ?', [booking.agent_id]);
         if (agent && agent.status === 'approved') {
-            const agentFee = totalAmount * 0.05;
+            const agentFee = totalAmount * 0.03;
             await CommissionModel.createCommission({
                 booking_id: bookingId,
                 amount: agentFee,
@@ -85,8 +85,8 @@ async function processConfirmedBooking(bookingId: string) {
         });
     }
 
-    // System Fee (10% - Agent 5% if exists)
-    const systemFeeRate = booking.agent_id ? 0.05 : 0.10;
+    // System Fee (10% total commission. 7% system if agent gets 3%, else 10%)
+    const systemFeeRate = booking.agent_id ? 0.07 : 0.10;
     const systemFee = totalAmount * systemFeeRate;
     await CommissionModel.createCommission({
         booking_id: bookingId,

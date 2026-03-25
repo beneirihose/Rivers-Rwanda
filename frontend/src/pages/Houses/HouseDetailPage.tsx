@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Bed, 
   Bath, 
@@ -28,6 +29,7 @@ import BookingForm from '../../components/forms/BookingForm';
 import ImageGallery from '../../components/common/ImageGallery';
 
 const HouseDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [house, setHouse] = useState<any>(null);
@@ -58,16 +60,16 @@ const HouseDetailPage = () => {
   };
 
   if (loading) return <div className="min-h-screen bg-light-gray flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-accent-orange"></div></div>;
-  if (!house) return <div className="min-h-screen bg-light-gray flex flex-col items-center justify-center gap-4"><h2 className="text-2xl font-bold text-primary-dark">House not found</h2><button onClick={() => navigate('/houses')} className="text-accent-orange font-bold hover:underline">Return to browse</button></div>;
+  if (!house) return <div className="min-h-screen bg-light-gray flex flex-col items-center justify-center gap-4"><h2 className="text-2xl font-bold text-primary-dark">{t('houses.noResults')}</h2><button onClick={() => navigate('/houses')} className="text-accent-orange font-bold hover:underline">{t('accommodations.backToSearch')}</button></div>;
 
   const images = parseImages(house.images);
   const price = house.monthly_rent_price || house.purchase_price;
   const isAvailable = house.status === 'available';
 
   const specs = [
-    { icon: <Bed size={20}/>, label: 'Bedrooms', value: `${house.bedrooms} beds` },
-    { icon: <Bath size={20}/>, label: 'Bathrooms', value: `${house.bathrooms} baths` },
-    { icon: <Ruler size={20}/>, label: 'Size', value: `${house.size_sqm || house.size} SQM` },
+    { icon: <Bed size={20}/>, label: t('houses.beds'), value: `${house.bedrooms} ${t('houses.beds')}` },
+    { icon: <Bath size={20}/>, label: t('houses.baths'), value: `${house.bathrooms} ${t('houses.baths')}` },
+    { icon: <Ruler size={20}/>, label: t('houses.sqm'), value: `${house.size_sqm || house.size} SQM` },
     { icon: <Layout size={20}/>, label: 'Balconies', value: `${house.balconies || 0} units` },
   ];
 
@@ -92,7 +94,7 @@ const HouseDetailPage = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-light hover:text-accent-orange transition-colors mb-10 bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 group w-fit">
             <ChevronLeft size={18} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-black uppercase text-[10px] tracking-[0.2em]">Back to Listings</span>
+            <span className="font-black uppercase text-[10px] tracking-[0.2em]">{t('accommodations.backToSearch')}</span>
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -105,7 +107,7 @@ const HouseDetailPage = () => {
               <div className="space-y-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="bg-accent-orange/10 text-accent-orange px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-accent-orange/20">
-                    House for {house.purpose?.toUpperCase() || (house.monthly_rent_price ? 'RENT' : 'SALE')}
+                    {t('nav.houses')} {t('accommodations.purpose')} {house.purpose?.toUpperCase() || (house.monthly_rent_price ? t('nav.forRent').toUpperCase() : t('nav.forSale').toUpperCase())}
                   </span>
                   <span className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border ${isAvailable ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
                     {house.status.replace('_', ' ')}
@@ -147,7 +149,7 @@ const HouseDetailPage = () => {
               </div>
 
               <div className="space-y-8">
-                <h3 className="text-xl font-black text-primary-dark uppercase tracking-widest">Features & Facilities</h3>
+                <h3 className="text-xl font-black text-primary-dark uppercase tracking-widest">{t('accommodations.facilities')}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {amenities.map(item => (
                         <div key={item.id} className={`flex items-center gap-4 p-5 rounded-2xl border transition-all ${item.active ? 'bg-white border-accent-orange/30 shadow-sm opacity-100' : 'bg-gray-50 border-transparent opacity-40 grayscale'}`}>
@@ -159,7 +161,7 @@ const HouseDetailPage = () => {
               </div>
 
               <div className="space-y-6">
-                <h3 className="text-xl font-black text-primary-dark uppercase tracking-widest m-0">About this house</h3>
+                <h3 className="text-xl font-black text-primary-dark uppercase tracking-widest m-0">{t('accommodations.about')}</h3>
                 <p className="text-gray-500 leading-relaxed font-medium text-lg">
                     {house.description || "Experience the perfect blend of comfort and style in this stunning residence."}
                 </p>
@@ -174,19 +176,19 @@ const HouseDetailPage = () => {
                 
                 <div className="space-y-10 relative z-10">
                     <div className="text-center space-y-2">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Total Price</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{t('accommodations.totalPrice')}</span>
                         <div className="text-4xl md:text-5xl font-black text-accent-orange tracking-tighter">
                             Rwf {price?.toLocaleString()}
                         </div>
                         <span className="text-[11px] font-bold uppercase text-gray-300 tracking-widest">
-                            {house.monthly_rent_price ? 'per month' : 'final price'}
+                            {house.monthly_rent_price ? t('houses.perMonth') : t('accommodations.fullPrice')}
                         </span>
                     </div>
 
                     {isAvailable ? (
                         !showBookingForm ? (
                             <button onClick={() => setShowBookingForm(true)} className="w-full bg-accent-orange text-white font-black py-6 rounded-3xl uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-2xl shadow-accent-orange/20 flex items-center justify-center gap-3">
-                                {house.monthly_rent_price ? 'Rent Now' : 'Buy Now'}
+                                {house.monthly_rent_price ? t('nav.forRent') : t('nav.forSale')}
                                 <ChevronLeft size={18} className="rotate-180" />
                             </button>
                         ) : (
@@ -195,14 +197,14 @@ const HouseDetailPage = () => {
                     ) : (
                         <div className="text-center bg-red-500/10 border border-red-500/20 text-red-300 rounded-[2rem] p-8">
                             <XCircle className="mx-auto mb-4" size={40} />
-                            <h4 className="font-black uppercase text-lg text-white mb-2">Unavailable</h4>
-                            <p className="text-red-300/80 text-xs font-bold uppercase tracking-tight tracking-wider leading-relaxed">This property is currently {house.status}.</p>
+                            <h4 className="font-black uppercase text-lg text-white mb-2">{t('accommodations.unavailable')}</h4>
+                            <p className="text-red-300/80 text-xs font-bold uppercase tracking-tight tracking-wider leading-relaxed">{t('accommodations.status')} {house.status}.</p>
                         </div>
                     )}
 
                     <div className="space-y-4 pt-6">
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                            <ShieldCheck size={16} className="text-accent-orange" /> Verified Listing
+                            <ShieldCheck size={16} className="text-accent-orange" /> {t('accommodations.verifiedListing')}
                         </div>
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-gray-400">
                             <Utensils size={16} className="text-accent-orange" /> Exclusive Agency

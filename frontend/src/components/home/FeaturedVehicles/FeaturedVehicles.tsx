@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import api from '../../../services/api';
 import { Link } from 'react-router-dom';
-import { Star, Fuel, Settings, Gauge } from 'lucide-react';
+import { Fuel, Settings, Gauge } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import ImageGallery from '../../common/ImageGallery';
 
 const FeaturedVehicles = () => {
+  const { t } = useTranslation();
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,12 +56,18 @@ const FeaturedVehicles = () => {
     visible: { y: 0, opacity: 1 }
   };
 
+  const getTranslatedValue = (key: string) => {
+    const lowerKey = key.toLowerCase();
+    const translation = t(`home.${lowerKey}`);
+    return translation !== `home.${lowerKey}` ? translation : key;
+  };
+
   return (
     <motion.div 
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.05 }}
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
     >
       {vehicles.map((car) => {
@@ -70,7 +78,7 @@ const FeaturedVehicles = () => {
           <motion.div 
             key={car.id} 
             variants={itemVariants}
-            className="bg-white rounded-[2rem] shadow-lg shadow-gray-200/50 overflow-hidden flex flex-col group border border-gray-100 hover:shadow-2xl hover:shadow-accent-orange/10 transition-all duration-500 h-full"
+            className="bg-white rounded-[2rem] shadow-lg shadow-gray-200/50 overflow-hidden flex flex-col group border border-gray-100 hover:shadow-2xl hover:shadow-accent-orange/10 transition-all duration-500 h-full min-h-[450px]"
           >
             <ImageGallery images={images} />
 
@@ -82,22 +90,22 @@ const FeaturedVehicles = () => {
                     </div>
                 </div>
               
-              <div className="grid grid-cols-3 gap-4 my-4 border-y border-gray-100 py-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 my-4 border-y border-gray-100 py-4">
                 {[ 
-                  { icon: <Fuel size={16}/>, label: car.fuel_type }, 
-                  { icon: <Settings size={16}/>, label: car.transmission }, 
-                  { icon: <Gauge size={16}/>, label: car.vehicle_type } 
+                  { icon: <Fuel size={14}/>, label: getTranslatedValue(car.fuel_type) }, 
+                  { icon: <Settings size={14}/>, label: getTranslatedValue(car.transmission) }, 
+                  { icon: <Gauge size={14}/>, label: getTranslatedValue(car.vehicle_type) } 
                 ].map((item, i) => (
-                  <div key={i} className={`flex items-center gap-2 text-text-light ${i !== 0 ? 'border-l border-gray-100 pl-4' : ''}`}>
+                  <div key={i} className="flex items-center gap-1.5 min-w-[30%] justify-center bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
                     <div className="text-accent-orange">{item.icon}</div>
-                    <span className="text-xs font-semibold capitalize">{item.label}</span>
+                    <span className="text-[10px] sm:text-xs font-bold capitalize text-primary-dark tracking-tight">{item.label}</span>
                   </div>
                 ))}
               </div>
 
                <div className="text-right mb-4">
                     <p className="text-accent-orange font-mono font-bold text-2xl">Rwf {price?.toLocaleString()}</p>
-                    <p className="text-xs text-text-light -mt-1">{car.purpose === 'rent' ? '/ day' : '/ purchase'}</p>
+                    <p className="text-xs text-text-light -mt-1">{car.purpose === 'rent' ? t('home.perDay') : t('nav.forSale')}</p>
                 </div>
 
               <div className="mt-auto">
@@ -105,7 +113,7 @@ const FeaturedVehicles = () => {
                   to={`/cars/${car.id}`} 
                   className="w-full inline-block text-center py-4 bg-gray-50 text-primary-dark font-black rounded-xl hover:bg-primary-dark hover:text-white transition-all duration-300 uppercase text-xs tracking-widest border border-gray-100 shadow-sm"
                 >
-                  View Details
+                  {t('home.viewDetails')}
                 </Link>
               </div>
             </div>

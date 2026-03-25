@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard, Bell, Settings } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard, Bell, Settings, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import api from '../../../services/api';
 
 const Header = () => {
+  const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -12,17 +14,27 @@ const Header = () => {
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<string | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const dropdownRef = useRef<HTMLLIElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const languages = [
+    { code: 'rw', name: 'RWANDA', flag: 'https://flagcdn.com/w40/rw.png' },
+    { code: 'en', name: 'ENGLISH', flag: 'https://flagcdn.com/w40/gb.png' },
+    { code: 'fr', name: 'FRANÇAIS', flag: 'https://flagcdn.com/w40/fr.png' }
+  ];
+
+  const currentLang = languages.find(l => l.code === i18n.language) || languages[1];
 
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/verify-otp'].includes(location.pathname);
   const isWhitePage = ['/about', '/contact', '/accommodations', '/cars', '/houses', '/profile', '/settings'].some(path => location.pathname.startsWith(path));
@@ -40,6 +52,9 @@ const Header = () => {
       }
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setIsLangOpen(false);
       }
     };
 
@@ -89,6 +104,7 @@ const Header = () => {
     setActiveMobileSubmenu(null);
     setIsProfileDropdownOpen(false);
     setIsNotificationsOpen(false);
+    setIsLangOpen(false);
   }, [location.pathname]);
 
   const handleLogout = (silent = false) => {
@@ -109,29 +125,34 @@ const Header = () => {
     } catch (err) {}
   };
 
+  const changeLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+    setIsLangOpen(false);
+  };
+
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
+    { name: t('nav.home'), path: '/' },
+    { name: t('nav.about'), path: '/about' },
     {
-      name: 'Accommodations',
+      name: t('nav.accommodations'),
       path: '/accommodations',
       dropdown: [
         { 
-          name: 'Apartments for Rent', 
+          name: t('nav.apartmentsRent'), 
           path: '/accommodations?type=apartment&purpose=rent',
           submenu: [
-            { name: 'Whole Apartment', path: '/accommodations?type=apartment&purpose=rent&sub_type=whole' },
-            { name: 'Apartment Room', path: '/accommodations?type=apartment&purpose=rent&sub_type=room' }
+            { name: t('nav.wholeApartment'), path: '/accommodations?type=apartment&purpose=rent&sub_type=whole' },
+            { name: t('nav.apartmentRoom'), path: '/accommodations?type=apartment&purpose=rent&sub_type=room' }
           ]
         },
-        { name: 'Apartments for Sale', path: '/accommodations?type=apartment&purpose=sale' },
-        { name: 'Hotel Rooms', path: '/accommodations?type=hotel_room' },
-        { name: 'Event Halls', path: '/accommodations?type=event_hall' }
+        { name: t('nav.apartmentsSale'), path: '/accommodations?type=apartment&purpose=sale' },
+        { name: t('nav.hotelRooms'), path: '/accommodations?type=hotel_room' },
+        { name: t('nav.eventHalls'), path: '/accommodations?type=event_hall' }
       ]
     },
-    { name: 'Cars', path: '/cars', dropdown: [{ name: 'For Rent', path: '/cars?purpose=rent' }, { name: 'For Sale', path: '/cars?purpose=buy' }] },
-    { name: 'Local Houses', path: '/houses', dropdown: [{ name: 'For Rent', path: '/houses?purpose=rent' }, { name: 'For Sale', path: '/houses?purpose=purchase' }] },
-    { name: 'Contact', path: '/contact' },
+    { name: t('nav.cars'), path: '/cars', dropdown: [{ name: t('nav.forRent'), path: '/cars?purpose=rent' }, { name: t('nav.forSale'), path: '/cars?purpose=buy' }] },
+    { name: t('nav.houses'), path: '/houses', dropdown: [{ name: t('nav.forRent'), path: '/houses?purpose=rent' }, { name: t('nav.forSale'), path: '/houses?purpose=purchase' }] },
+    { name: t('nav.contact'), path: '/contact' },
   ];
 
   const getDisplayName = () => profile?.first_name ? `${profile.first_name}`.toUpperCase() : profile?.email.split('@')[0].toUpperCase() || 'USER';
@@ -217,12 +238,46 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2 md:gap-6">
+          {/* Language Switcher */}
+          <div className="relative" ref={langRef}>
+            <button
+              onClick={() => { setIsLangOpen(!isLangOpen); setIsProfileDropdownOpen(false); setIsNotificationsOpen(false); }}
+              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 p-2 rounded-xl border border-white/10 transition-all text-white"
+            >
+              <img src={currentLang.flag} alt={currentLang.name} className="w-5 h-auto object-cover rounded-sm shadow-sm" />
+              <ChevronDown size={14} className={`transition-transform duration-300 ${isLangOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {isLangOpen && (
+                <motion.div
+                  variants={dropdownVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  className={`absolute top-full right-0 mt-4 w-48 ${(isScrolled || isAuthPage || isWhitePage) ? 'bg-primary-dark' : 'bg-[#1a2b4b]'} rounded-2xl shadow-2xl border border-white/10 overflow-hidden p-2`}
+                >
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => changeLanguage(lang.code)}
+                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${i18n.language === lang.code ? 'bg-accent-orange text-white' : 'text-white hover:bg-white/5'}`}
+                    >
+                      <img src={lang.flag} alt={lang.name} className="w-6 h-auto shadow-sm" />
+                      <span className="text-[11px] font-black uppercase tracking-widest">{lang.name}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Action Icons */}
           {token && (
             <div className="hidden md:flex items-center gap-4 text-white/60">
               <div className="relative" ref={notificationRef}>
                 <button 
-                  onClick={() => { setIsNotificationsOpen(!isNotificationsOpen); setIsProfileDropdownOpen(false); }}
+                  onClick={() => { setIsNotificationsOpen(!isNotificationsOpen); setIsProfileDropdownOpen(false); setIsLangOpen(false); }}
                   className="hover:text-accent-orange transition-colors relative"
                 >
                   <Bell size={20} />
@@ -277,7 +332,7 @@ const Header = () => {
             {token && profile ? (
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => { setIsProfileDropdownOpen(!isProfileDropdownOpen); setIsNotificationsOpen(false); }}
+                  onClick={() => { setIsProfileDropdownOpen(!isProfileDropdownOpen); setIsNotificationsOpen(false); setIsLangOpen(false); }}
                   className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-1 md:p-1.5 pr-2 md:pr-4 rounded-full transition-all border border-white/10"
                 >
                   <img
@@ -307,17 +362,17 @@ const Header = () => {
                       </div>
                       <div className="p-3">
                         <Link to={`/${user.role}/dashboard`} className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-primary-dark hover:bg-gray-50 rounded-xl transition-all">
-                          <LayoutDashboard size={16} className="text-accent-orange" /> Dashboard
+                          <LayoutDashboard size={16} className="text-accent-orange" /> {t('nav.dashboard')}
                         </Link>
                         <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-primary-dark hover:bg-gray-50 rounded-xl transition-all">
-                          <User size={16} className="text-accent-orange" /> My Profile
+                          <User size={16} className="text-accent-orange" /> {t('nav.profile')}
                         </Link>
                         <div className="h-px bg-gray-100 my-2 mx-4"></div>
                         <button
                           onClick={() => handleLogout()}
                           className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50 rounded-xl transition-all"
                         >
-                          <LogOut size={16} /> Logout
+                          <LogOut size={16} /> {t('nav.logout')}
                         </button>
                       </div>
                     </motion.div>
@@ -329,7 +384,7 @@ const Header = () => {
                 to="/login"
                 className="bg-accent-orange text-white px-4 md:px-8 py-2 md:py-3 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl shadow-accent-orange/20 whitespace-nowrap"
               >
-                Sign In
+                {t('nav.signIn')}
               </Link>
             )}
           </div>
@@ -368,6 +423,19 @@ const Header = () => {
               </div>
 
               <nav className="flex-1 overflow-y-auto p-8">
+                <div className="mb-8 flex gap-4">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => changeLanguage(lang.code)}
+                      className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${i18n.language === lang.code ? 'bg-accent-orange border-accent-orange text-white' : 'bg-white/5 border-white/10 text-white'}`}
+                    >
+                      <img src={lang.flag} alt={lang.name} className="w-8 h-auto" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{lang.name}</span>
+                    </button>
+                  ))}
+                </div>
+
                 <ul className="space-y-6">
                   {navLinks.map((link) => (
                     <li key={link.name}>
@@ -434,7 +502,7 @@ const Header = () => {
                     to="/login"
                     className="block w-full text-center bg-accent-orange text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-2xl shadow-accent-orange/20"
                   >
-                    Get Started
+                    {t('home.getStarted')}
                   </Link>
                 )}
                 {token && profile && (

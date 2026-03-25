@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import api from '../../../services/api';
 import { Building2, Car, Users, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const StatsSection = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     apartments: 0,
     cars: 0,
@@ -14,7 +16,6 @@ const StatsSection = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Calling public stats endpoint to avoid 403 Forbidden
         const response = await api.get('/public/stats');
         const data = response.data.data;
         setStats({
@@ -31,10 +32,10 @@ const StatsSection = () => {
   }, []);
 
   const statItems = [
-    { label: 'Apartments', value: stats.apartments, icon: <Building2 size={32} />, color: 'bg-orange-50 text-accent-orange' },
-    { label: 'Cars for Rent/Buy', value: stats.cars, icon: <Car size={32} />, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Active Agents', value: stats.agents, icon: <Users size={32} />, color: 'bg-green-50 text-green-600' },
-    { label: 'Successful Bookings', value: stats.bookings, icon: <CheckCircle2 size={32} />, color: 'bg-purple-50 text-purple-600' }
+    { label: t('home.stats.apartments'), value: stats.apartments, icon: <Building2 size={32} />, color: 'bg-orange-50 text-accent-orange' },
+    { label: t('home.stats.cars'), value: stats.cars, icon: <Car size={32} />, color: 'bg-blue-50 text-blue-600' },
+    { label: t('home.stats.agents'), value: stats.agents, icon: <Users size={32} />, color: 'bg-green-50 text-green-600' },
+    { label: t('home.stats.bookings'), value: stats.bookings, icon: <CheckCircle2 size={32} />, color: 'bg-purple-50 text-purple-600' }
   ];
 
   return (

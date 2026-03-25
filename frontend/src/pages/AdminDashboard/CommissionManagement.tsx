@@ -1,8 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { DollarSign, CheckCircle, Clock, User, Phone, ArrowUpRight, Percent, Trash2, Wallet, Briefcase, TrendingUp, Upload, FileText, ExternalLink, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, Clock, User, Phone, Trash2, Wallet, Briefcase, TrendingUp, Upload, FileText } from 'lucide-react';
 
 const CommissionManagement = () => {
   const [commissions, setCommissions] = useState<any[]>([]);
@@ -73,7 +72,8 @@ const CommissionManagement = () => {
         if (curr.commission_type === 'system') acc.systemTotal += amount;
         if (curr.commission_type === 'agent') acc.agentTotal += amount;
         if (curr.commission_type === 'seller_payout') acc.sellerTotal += amount;
-        if (curr.status === 'approved') acc.pendingTotal += amount;
+        // Pending = approved (awaiting payment) + paid (awaiting recipient confirmation)
+        if (curr.status === 'approved' || curr.status === 'paid') acc.pendingTotal += amount;
         return acc;
     }, { systemTotal: 0, agentTotal: 0, sellerTotal: 0, pendingTotal: 0 });
   }, [commissions]);
@@ -84,7 +84,7 @@ const CommissionManagement = () => {
     </div>
   );
 
-  const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
+  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
 
   return (
     <div className="space-y-10">
@@ -110,7 +110,7 @@ const CommissionManagement = () => {
                 <TrendingUp size={24} />
             </div>
             <div>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Revenue (10%)</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">System Revenue</p>
                 <p className="text-lg font-black text-primary-dark">Rwf {stats.systemTotal.toLocaleString()}</p>
             </div>
         </div>

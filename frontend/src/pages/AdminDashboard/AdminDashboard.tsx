@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { Users, Home, Car, BookOpen, Plus, UserCheck, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     users: 0,
     accommodations: 0,
@@ -34,18 +36,18 @@ const AdminDashboard = () => {
   );
 
   const statCards = [
-    { label: 'Total Users', value: stats.users, icon: <Users size={24} />, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Accommodations', value: stats.accommodations, icon: <Building2 size={24} />, color: 'bg-green-50 text-green-600' },
-    { label: 'Vehicles', value: stats.vehicles, icon: <Car size={24} />, color: 'bg-purple-50 text-purple-600' },
-    { label: 'Listed Houses', value: stats.houses || 0, icon: <Home size={24} />, color: 'bg-indigo-50 text-indigo-600' },
-    { label: 'Total Bookings', value: stats.bookings, icon: <BookOpen size={24} />, color: 'bg-orange-50 text-accent-orange' },
+    { label: t('dashboard.admin.stats.users'), value: stats.users, icon: <Users size={24} />, color: 'bg-blue-50 text-blue-600' },
+    { label: t('dashboard.admin.stats.accommodations'), value: stats.accommodations, icon: <Building2 size={24} />, color: 'bg-green-50 text-green-600' },
+    { label: t('dashboard.admin.stats.vehicles'), value: stats.vehicles, icon: <Car size={24} />, color: 'bg-purple-50 text-purple-600' },
+    { label: t('dashboard.admin.stats.houses'), value: stats.houses || 0, icon: <Home size={24} />, color: 'bg-indigo-50 text-indigo-600' },
+    { label: t('dashboard.admin.stats.bookings'), value: stats.bookings, icon: <BookOpen size={24} />, color: 'bg-orange-50 text-accent-orange' },
   ];
 
   return (
     <div className="space-y-10 pt-40 pb-10">
       <div>
-        <h1 className="text-3xl font-bold text-primary-dark tracking-tighter uppercase">Admin Overview</h1>
-        <p className="text-text-light mt-2 font-medium">Manage your platform's resources and performance from a central hub.</p>
+        <h1 className="text-3xl font-bold text-primary-dark tracking-tighter uppercase">{t('dashboard.admin.title')}</h1>
+        <p className="text-text-light mt-2 font-medium">{t('dashboard.admin.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -65,7 +67,7 @@ const AdminDashboard = () => {
       <div>
         <h2 className="text-xl font-black text-primary-dark uppercase tracking-tighter mb-8 flex items-center gap-2">
            <div className="w-8 h-1 bg-accent-orange rounded-full"></div>
-           Quick Platform Actions
+           {t('dashboard.admin.actions.title')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Link 
@@ -76,7 +78,7 @@ const AdminDashboard = () => {
               <div className="p-3 bg-gray-50 text-gray-400 group-hover:bg-accent-orange group-hover:text-white transition-all rounded-xl">
                 <Plus size={20} />
               </div>
-              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">Add Accommodation</span>
+              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">{t('dashboard.admin.actions.addAccommodation')}</span>
             </div>
             <Building2 size={20} className="text-gray-200 group-hover:text-accent-orange transition-colors" />
           </Link>
@@ -89,7 +91,7 @@ const AdminDashboard = () => {
               <div className="p-3 bg-gray-50 text-gray-400 group-hover:bg-accent-orange group-hover:text-white transition-all rounded-xl">
                 <Plus size={20} />
               </div>
-              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">Add New House</span>
+              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">{t('dashboard.admin.actions.addNewHouse')}</span>
             </div>
             <Home size={20} className="text-gray-200 group-hover:text-accent-orange transition-colors" />
           </Link>
@@ -102,7 +104,7 @@ const AdminDashboard = () => {
               <div className="p-3 bg-gray-50 text-gray-400 group-hover:bg-accent-orange group-hover:text-white transition-all rounded-xl">
                 <Plus size={20} />
               </div>
-              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">Add New Vehicle</span>
+              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">{t('dashboard.admin.actions.addNewVehicle')}</span>
             </div>
             <Car size={20} className="text-gray-200 group-hover:text-accent-orange transition-colors" />
           </Link>
@@ -115,7 +117,7 @@ const AdminDashboard = () => {
               <div className="p-3 bg-gray-50 text-gray-400 group-hover:bg-accent-orange group-hover:text-white transition-all rounded-xl">
                 <UserCheck size={20} />
               </div>
-              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">Review Agents</span>
+              <span className="font-bold text-primary-dark uppercase text-[10px] tracking-widest">{t('dashboard.admin.actions.reviewAgents')}</span>
             </div>
             <Users size={20} className="text-gray-200 group-hover:text-accent-orange transition-colors" />
           </Link>

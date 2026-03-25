@@ -20,11 +20,13 @@ export interface Accommodation extends RowDataPacket {
   parking: boolean;
   garden: boolean;
   decoration: boolean;
+  sonolization: boolean;
   gym: boolean;
   kitchen: boolean;
   toilet: boolean;
   living_room: boolean;
   swimming_pool: boolean;
+  number_of_living_rooms?: number;
   floor_number?: number;
   room_name_number?: string;
   bed_type?: 'single' | 'double' | 'triple' | 'other';
@@ -86,10 +88,10 @@ export const createAccommodation = async (data: any): Promise<string> => {
     INSERT INTO accommodations (
       id, seller_id, type, sub_type, purpose, name, description, 
       city, district, price_per_night, price_per_event, sale_price,
-      max_guests, capacity, wifi, parking, garden, decoration,
+      wifi, parking, garden, decoration, sonolization,
       gym, kitchen, toilet, living_room, swimming_pool,
-      floor_number, room_name_number, bed_type, has_elevator, is_furnished,
-      status, images, amenities
+      number_of_living_rooms, floor_number, room_name_number, bed_type,
+      has_elevator, is_furnished, status, images, amenities
     )
     VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
@@ -105,17 +107,17 @@ export const createAccommodation = async (data: any): Promise<string> => {
     data.price_per_night || null,
     data.price_per_event || null,
     data.sale_price || null,
-    data.max_guests || null,
-    data.capacity || null,
     toInt(data.wifi),
     toInt(data.parking),
     toInt(data.garden),
     toInt(data.decoration),
+    toInt(data.sonolization),
     toInt(data.gym),
     toInt(data.kitchen),
     toInt(data.toilet),
     toInt(data.living_room),
     toInt(data.swimming_pool),
+    data.number_of_living_rooms || null,
     data.floor_number || null,
     data.room_name_number || null,
     data.bed_type || null,
@@ -138,7 +140,7 @@ export const updateAccommodation = async (id: string, data: any): Promise<void> 
   const params: any[] = [];
   
   const boolFields = [
-    'wifi', 'parking', 'garden', 'decoration', 'gym', 'kitchen', 
+    'wifi', 'parking', 'garden', 'decoration', 'sonolization', 'gym', 'kitchen', 
     'toilet', 'living_room', 'swimming_pool', 'has_elevator', 'is_furnished'
   ];
 

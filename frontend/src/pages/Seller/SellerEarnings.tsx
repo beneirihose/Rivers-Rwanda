@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
-import { Wallet, Calendar, CheckCircle2, Clock, Eye, Check, X, Trash2, FileText, ExternalLink, TrendingUp } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, Check, X, FileText, ExternalLink, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
@@ -36,15 +36,28 @@ const SellerEarnings = () => {
     }
   };
 
+  const handleRejectReceipt = async (id: string) => {
+    if (!window.confirm("Are you sure you want to reject this payout? The admin will be notified to correct it.")) return;
+    try {
+      await api.patch(`/sellers/commissions/${id}/reject-receipt`);
+      toast.success('Payout rejected. Admin has been notified.');
+      fetchEarnings();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Action failed');
+    }
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-orange"></div>
     </div>
   );
 
-  const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
+  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
   const totalReceived = commissions.reduce((acc, curr) => acc + (curr.status === 'completed' ? Number(curr.amount) : 0), 0);
-  const pendingPayout = commissions.reduce((acc, curr) => acc + (curr.status === 'approved' || curr.status === 'paid' ? Number(curr.amount) : 0), 0);
+  // Pending = only 'paid' (money sent but not yet confirmed) — 'approved' is still being processed by admin
+  const pendingPayout = commissions.reduce((acc, curr) => acc + (curr.status === 'paid' ? Number(curr.amount) : 0), 0);
+  const awaitingProcessing = commissions.reduce((acc, curr) => acc + (curr.status === 'approved' ? Number(curr.amount) : 0), 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -62,6 +75,12 @@ const SellerEarnings = () => {
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pending Payout</span>
             <span className="text-lg font-black text-accent-orange tracking-tighter">Rwf {pendingPayout.toLocaleString()}</span>
           </div>
+          {awaitingProcessing > 0 && (
+            <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-orange-100 flex flex-col">
+              <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Processing</span>
+              <span className="text-lg font-black text-orange-500 tracking-tighter">Rwf {awaitingProcessing.toLocaleString()}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -105,7 +124,7 @@ const SellerEarnings = () => {
                       'bg-orange-50 text-orange-600 border-orange-100'
                     }`}>
                       {comm.status === 'completed' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                      {comm.status === 'paid' ? 'FUNDS SENT - VERIFY' : comm.status}
+                      {comm.status === 'paid' ? 'FUNDS SENT - VERIFY' : comm.status === 'approved' ? 'AWAITING PAYMENT' : comm.status}
                     </span>
                   </td>
                   <td className="px-8 py-6">
@@ -123,12 +142,21 @@ const SellerEarnings = () => {
                   <td className="px-8 py-6">
                     <div className="flex justify-center gap-2">
                       {comm.status === 'paid' && (
-                        <button 
-                            onClick={() => handleConfirmReceipt(comm.id)}
-                            className="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all shadow-lg shadow-green-100 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
-                        >
-                            <Check size={14} strokeWidth={3} /> Approve Receipt
-                        </button>
+                        <>
+                            <button 
+                                onClick={() => handleConfirmReceipt(comm.id)}
+                                className="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all shadow-lg shadow-green-100 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                            >
+                                <Check size={14} strokeWidth={3} /> Approve Receipt
+                            </button>
+                            <button 
+                                onClick={() => handleRejectReceipt(comm.id)}
+                                className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm"
+                                title="Reject Payout"
+                            >
+                                <X size={16} strokeWidth={3} />
+                            </button>
+                        </>
                       )}
                       {comm.status === 'completed' && (
                         <div className="flex items-center gap-2 text-green-600 font-black text-[10px] uppercase tracking-widest">
