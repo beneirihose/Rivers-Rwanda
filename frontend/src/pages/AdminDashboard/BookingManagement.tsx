@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { CheckCircle, XCircle, Clock, Check, CreditCard, Eye, Trash2, Download, Printer, X, Calendar, Home } from 'lucide-react';
+import { CreditCard, Eye, Trash2, Download, Printer, X, Calendar, Home, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Invoice from '../../components/common/Invoice';
 

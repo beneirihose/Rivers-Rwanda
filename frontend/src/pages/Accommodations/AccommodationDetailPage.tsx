@@ -5,8 +5,8 @@ import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { 
-  Share2, Heart, ArrowLeft, ShieldCheck, Users, 
-  MapPin, Star, Wifi, Car, Info, CheckCircle2, XCircle,
+  Share2, Heart, ArrowLeft, ShieldCheck, 
+  MapPin, Star, Wifi, Car, CheckCircle2, XCircle,
   TreePine, Sparkles, Building2, Box, Dumbbell, Utensils, Bath, Tv, Waves, BedDouble, Layers
 } from 'lucide-react';
 import ImageGallery from '../../components/common/ImageGallery';
@@ -111,13 +111,8 @@ const AccommodationDetailPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-10 border-y border-gray-100">
-                <div className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-3xl">
-                  <Users size={24} className="text-accent-orange" />
-                  <span className="text-[10px] font-black uppercase text-gray-400">{t('accommodations.maxGuests')}</span>
-                  <span className="text-lg font-black text-primary-dark">{item.max_guests || item.capacity || 0}</span>
-                </div>
-                {item.floor_number !== null && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-10 border-y border-gray-100">
+                {item.floor_number !== null && item.floor_number !== undefined && (
                   <div className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-3xl">
                     <Layers size={24} className="text-accent-orange" />
                     <span className="text-[10px] font-black uppercase text-gray-400">{t('accommodations.floor')}</span>
@@ -148,17 +143,17 @@ const AccommodationDetailPage = () => {
               <div className="space-y-6">
                 <h3 className="text-xl font-black text-primary-dark uppercase tracking-widest">{t('accommodations.facilities')}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    {item.wifi && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Wifi size={18} className="text-accent-orange"/> {t('accommodations.freeWifi')}</div>}
-                    {item.parking && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Car size={18} className="text-accent-orange"/> {t('accommodations.freeParking')}</div>}
-                    {item.garden && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><TreePine size={18} className="text-accent-orange"/> {t('accommodations.privateGarden')}</div>}
-                    {item.gym && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Dumbbell size={18} className="text-accent-orange"/> {t('accommodations.gym')}</div>}
-                    {item.kitchen && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Utensils size={18} className="text-accent-orange"/> {t('accommodations.kitchen')}</div>}
-                    {item.toilet && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Bath size={18} className="text-accent-orange"/> {t('accommodations.toilet')}</div>}
-                    {item.living_room && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Tv size={18} className="text-accent-orange"/> {t('accommodations.livingRoom')}</div>}
-                    {item.swimming_pool && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Waves size={18} className="text-accent-orange"/> {t('accommodations.swimmingPool')}</div>}
-                    {item.decoration && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Sparkles size={18} className="text-accent-orange"/> {t('accommodations.decoration')}</div>}
-                    {item.has_elevator && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Building2 size={18} className="text-accent-orange"/> {t('accommodations.elevator')}</div>}
-                    {item.is_furnished && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Box size={18} className="text-accent-orange"/> {t('accommodations.furnished')}</div>}
+                    {!!item.wifi && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Wifi size={18} className="text-accent-orange"/> {t('accommodations.freeWifi')}</div>}
+                    {!!item.parking && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Car size={18} className="text-accent-orange"/> {t('accommodations.freeParking')}</div>}
+                    {!!item.garden && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><TreePine size={18} className="text-accent-orange"/> {t('accommodations.privateGarden')}</div>}
+                    {!!item.gym && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Dumbbell size={18} className="text-accent-orange"/> {t('accommodations.gym')}</div>}
+                    {!!item.kitchen && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Utensils size={18} className="text-accent-orange"/> {t('accommodations.kitchen')}</div>}
+                    {!!item.toilet && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Bath size={18} className="text-accent-orange"/> {t('accommodations.bathroom')}</div>}
+                    {!!item.living_room && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Tv size={18} className="text-accent-orange"/> {t('accommodations.livingRoom')}</div>}
+                    {!!item.swimming_pool && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Waves size={18} className="text-accent-orange"/> {t('accommodations.swimmingPool')}</div>}
+                    {!!item.decoration && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Sparkles size={18} className="text-accent-orange"/> {t('accommodations.decoration')}</div>}
+                    {!!item.has_elevator && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Building2 size={18} className="text-accent-orange"/> {t('accommodations.elevator')}</div>}
+                    {!!item.is_furnished && <div className="flex items-center gap-3 text-sm font-bold uppercase text-gray-600"><Box size={18} className="text-accent-orange"/> {t('accommodations.furnished')}</div>}
                 </div>
               </div>
             </div>

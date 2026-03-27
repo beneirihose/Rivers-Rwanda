@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Users, UserPlus, Shield, User, Trash2, Edit2, X, Check, Mail, ShieldAlert, Store } from 'lucide-react';
+import { UserPlus, Shield, User, Trash2, Edit2, X, Mail, Store } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const UserManagement = () => {

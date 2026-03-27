@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { 
   Bed, 
   Bath, 
-  Home as HomeIcon, 
   MapPin, 
   ChevronLeft, 
   Info,
@@ -23,7 +22,8 @@ import {
   TreePine,
   Layers,
   Grid3X3,
-  Ruler
+  Ruler,
+  Home
 } from 'lucide-react';
 import BookingForm from '../../components/forms/BookingForm';
 import ImageGallery from '../../components/common/ImageGallery';
@@ -207,7 +207,7 @@ const HouseDetailPage = () => {
                             <ShieldCheck size={16} className="text-accent-orange" /> {t('accommodations.verifiedListing')}
                         </div>
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                            <Utensils size={16} className="text-accent-orange" /> Exclusive Agency
+                            <Home size={16} className="text-accent-orange" /> Exclusive Agency
                         </div>
                     </div>
                 </div>

@@ -1,11 +1,11 @@
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
-import { Upload, X, ImageIcon, XCircle } from 'lucide-react';
+import { ImageIcon, XCircle } from 'lucide-react';
 
 const schema = z.object({
   purpose: z.enum(['rent', 'buy']),
@@ -28,14 +28,22 @@ const schema = z.object({
     path: ['sale_price'],
 });
 
+type VehicleFormData = z.infer<typeof schema>;
+
 const AddVehicleForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({ 
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<VehicleFormData>({ 
     resolver: zodResolver(schema), 
-    defaultValues: { purpose: 'rent', vehicle_type: 'sedan', agreed_to_commission: false } 
+    defaultValues: { 
+      purpose: 'rent', 
+      vehicle_type: 'sedan', 
+      agreed_to_commission: false,
+      transmission: 'automatic',
+      fuel_type: 'petrol'
+    } 
   });
   
   const purpose = watch('purpose');
@@ -57,7 +65,7 @@ const AddVehicleForm = () => {
 
   const previews = useMemo(() => selectedFiles.map(file => URL.createObjectURL(file)), [selectedFiles]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: VehicleFormData) => {
     if (selectedFiles.length === 0) {
         toast.error('At least one image is required.');
         return;
@@ -67,7 +75,10 @@ const AddVehicleForm = () => {
     const formData = new FormData();
     
     Object.keys(data).forEach(key => {
-        formData.append(key, data[key]);
+        const value = (data as any)[key];
+        if (value !== undefined) {
+          formData.append(key, String(value));
+        }
     });
 
     selectedFiles.forEach(file => {
@@ -103,6 +114,7 @@ const AddVehicleForm = () => {
                 <option value="rent">For Rent</option>
                 <option value="buy">For Sale</option>
               </select>
+              {errors.purpose && <p className="text-red-500 text-[10px] font-bold">{errors.purpose.message}</p>}
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Vehicle Type</label>
@@ -114,6 +126,7 @@ const AddVehicleForm = () => {
                 <option value="luxury">Luxury</option>
                 <option value="other">Other</option>
               </select>
+              {errors.vehicle_type && <p className="text-red-500 text-[10px] font-bold">{errors.vehicle_type.message}</p>}
             </div>
           </div>
 
@@ -121,17 +134,17 @@ const AddVehicleForm = () => {
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-gray-400">Make</label>
                 <input {...register('make')} className="w-full p-4 border-2 rounded-2xl font-bold bg-gray-50" placeholder="e.g. Toyota" />
-                {errors.make && <p className="text-red-500 text-[10px] font-bold">{errors.make.message as string}</p>}
+                {errors.make && <p className="text-red-500 text-[10px] font-bold">{errors.make.message}</p>}
             </div>
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-gray-400">Model</label>
                 <input {...register('model')} className="w-full p-4 border-2 rounded-2xl font-bold bg-gray-50" placeholder="e.g. Land Cruiser" />
-                {errors.model && <p className="text-red-500 text-[10px] font-bold">{errors.model.message as string}</p>}
+                {errors.model && <p className="text-red-500 text-[10px] font-bold">{errors.model.message}</p>}
             </div>
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-gray-400">Year</label>
                 <input type="number" {...register('year')} className="w-full p-4 border-2 rounded-2xl font-bold bg-gray-50" />
-                {errors.year && <p className="text-red-500 text-[10px] font-bold">{errors.year.message as string}</p>}
+                {errors.year && <p className="text-red-500 text-[10px] font-bold">{errors.year.message}</p>}
             </div>
           </div>
 
@@ -142,6 +155,7 @@ const AddVehicleForm = () => {
                     <option value="automatic">Automatic</option>
                     <option value="manual">Manual</option>
                 </select>
+                {errors.transmission && <p className="text-red-500 text-[10px] font-bold">{errors.transmission.message}</p>}
             </div>
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-gray-400">Fuel Type</label>
@@ -151,10 +165,12 @@ const AddVehicleForm = () => {
                     <option value="electric">Electric</option>
                     <option value="hybrid">Hybrid</option>
                 </select>
+                {errors.fuel_type && <p className="text-red-500 text-[10px] font-bold">{errors.fuel_type.message}</p>}
             </div>
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-gray-400">Seating</label>
                 <input type="number" {...register('seating_capacity')} className="w-full p-4 border-2 rounded-2xl font-bold bg-gray-50" />
+                {errors.seating_capacity && <p className="text-red-500 text-[10px] font-bold">{errors.seating_capacity.message}</p>}
             </div>
           </div>
 
@@ -164,13 +180,13 @@ const AddVehicleForm = () => {
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-primary-dark">Daily Rate (Rwf)</label>
                         <input type="number" {...register('daily_rate')} className="w-full p-4 border-2 border-white rounded-2xl font-bold" placeholder="0.00" />
-                        {errors.daily_rate && <p className="text-red-500 text-[10px] font-bold">{errors.daily_rate.message as string}</p>}
+                        {errors.daily_rate && <p className="text-red-500 text-[10px] font-bold">{errors.daily_rate.message}</p>}
                     </div>
                 ) : (
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-primary-dark">Sale Price (Rwf)</label>
                         <input type="number" {...register('sale_price')} className="w-full p-4 border-2 border-white rounded-2xl font-bold" placeholder="0.00" />
-                        {errors.sale_price && <p className="text-red-500 text-[10px] font-bold">{errors.sale_price.message as string}</p>}
+                        {errors.sale_price && <p className="text-red-500 text-[10px] font-bold">{errors.sale_price.message}</p>}
                     </div>
                 )}
             </div>
@@ -181,7 +197,7 @@ const AddVehicleForm = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {previews.map((src, i) => (
                     <div key={i} className="relative aspect-video rounded-2xl overflow-hidden border-2 border-accent-orange shadow-sm group">
-                        <img src={src} className="w-full h-full object-cover" />
+                        <img src={src} className="w-full h-full object-cover" alt="" />
                         <button type="button" onClick={() => removeImage(i)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                             <XCircle size={16} />
                         </button>
@@ -201,7 +217,7 @@ const AddVehicleForm = () => {
             <input type="checkbox" {...register('agreed_to_commission')} id="commission" className="h-5 w-5 rounded-lg border-2 border-gray-300 text-accent-orange focus:ring-accent-orange transition-all" />
             <label htmlFor="commission" className="text-xs font-bold text-gray-600 uppercase tracking-tight">I agree to pay a 10% commission to the system owner upon successful sale/rent.</label>
           </div>
-          {errors.agreed_to_commission && <p className="text-red-500 text-[10px] font-bold -mt-6 ml-2">{errors.agreed_to_commission.message as string}</p>}
+          {errors.agreed_to_commission && <p className="text-red-500 text-[10px] font-bold -mt-6 ml-2">{errors.agreed_to_commission.message}</p>}
 
           <button type="submit" disabled={loading} className="w-full bg-primary-dark text-white font-black py-6 rounded-3xl uppercase tracking-[0.2em] text-xs hover:bg-accent-orange transition-all duration-500 shadow-2xl active:scale-95 disabled:opacity-50">
             {loading ? 'Processing...' : 'Submit Vehicle for Approval'}

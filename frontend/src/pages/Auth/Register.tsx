@@ -21,21 +21,26 @@ const schema = z.object({
   path: ["nationalId"],
 });
 
+type FormData = z.infer<typeof schema>;
+
 const Register = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({ resolver: zodResolver(schema), defaultValues: { role: 'client' } });
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({ 
+    resolver: zodResolver(schema), 
+    defaultValues: { role: 'client' } 
+  });
   const role = watch('role');
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
       if (data.role === 'seller') {
-        const [firstName, ...lastName] = data.fullName.split(' ');
+        const [firstName, ...lastNameParts] = data.fullName.split(' ');
         const sellerData = {
             firstName,
-            lastName: lastName.join(' '),
+            lastName: lastNameParts.join(' '),
             email: data.email,
             phoneNumber: data.phone,
             nationalId: data.nationalId,
@@ -86,27 +91,27 @@ const Register = () => {
 
           <div>
             <input {...register('fullName')} placeholder={t('contact.fullName')} className="w-full p-4 border-2 rounded-xl outline-none" />
-            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message as string}</p>}
+            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>}
           </div>
 
           {(role === 'agent' || role === 'seller') && (
             <div>
                 <input {...register('nationalId')} placeholder={t('auth.nationalIdPlaceholder')} className="w-full p-4 border-2 rounded-xl outline-none" />
-                {errors.nationalId && <p className="text-red-500 text-xs mt-1">{errors.nationalId.message as string}</p>}
+                {errors.nationalId && <p className="text-red-500 text-xs mt-1">{errors.nationalId.message}</p>}
             </div>
           )}
 
           <div>
             <input {...register('email')} placeholder={t('auth.emailLabel')} className="w-full p-4 border-2 rounded-xl outline-none" />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
           </div>
           <div>
             <input {...register('phone')} placeholder={t('auth.phoneLabel')} className="w-full p-4 border-2 rounded-xl outline-none" />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message as string}</p>}
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
           </div>
           <div>
             <input {...register('password')} type="password" placeholder={t('auth.passwordLabel')} className="w-full p-4 border-2 rounded-xl outline-none" />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message as string}</p>}
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-accent-orange text-white font-bold py-4 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { Link, useLocation } from 'react-router-dom';
-import { MapPin, Tag, Star, Search, Building2, LayoutGrid } from 'lucide-react';
+import { MapPin, Tag, Star, Search, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 

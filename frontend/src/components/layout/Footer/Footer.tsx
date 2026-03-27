@@ -19,7 +19,9 @@ const Footer = () => {
               {t('footer.brandDesc')}
             </p>
             <div className="flex gap-4 text-accent-orange">
+                <a href="https://www.facebook.com/profile.php?id=61585040398721" target="_blank" rel="noopener noreferrer">
               <Facebook size={18} className="cursor-pointer hover:text-white transition-colors" />
+                </a>
                <a href="https://x.com/RiversRwanda1" target="_blank" rel="noopener noreferrer">
                   <Twitter size={18} className="cursor-pointer hover:text-white transition-colors" />
                 </a>
@@ -67,7 +69,14 @@ const Footer = () => {
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin size={20} className="text-accent-orange shrink-0 mt-1" />
-                <p className="text-gray-400 text-sm">Kigali Heights, 4th Floor, KG 7 Ave, Kigali, Rwanda</p>
+                <a
+                  href="https://www.google.com/maps/@-1.9666037,30.0970127,991m/data=!3m1!1e3?hl=en&entry=ttu&g_ep=EgoyMDI2MDMyNC4wIKXMDSoASAFQAw%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-accent-orange transition-colors text-sm"
+                >
+                 Kigali-Gasabo KG 601st.
+                </a>
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={20} className="text-accent-orange shrink-0" />
@@ -94,7 +103,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-xs">
-            &copy; {new Date().getFullYear()} <span className="text-accent-orange font-bold uppercase">Rivers Rwanda</span>. {t('footer.allRightsReserved')}
+            &copy; 2025 <span className="text-accent-orange font-bold uppercase">Rivers Rwanda</span>. {t('footer.allRightsReserved')}
           </p>
           <div className="flex gap-6 text-xs text-gray-500 uppercase font-bold">
             <Link to="/terms" className="hover:text-white transition-colors">{t('footer.terms')}</Link>

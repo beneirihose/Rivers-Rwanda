@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard, Bell, Settings, Globe } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, LayoutDashboard, Bell, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../../services/api';
@@ -354,7 +354,7 @@ const Header = () => {
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
-                      className="absolute top-full right-0 mt-4 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-50 overflow-hidden"
+                      className="absolute top-full right-0 mt-4 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden"
                     >
                       <div className="p-6 bg-primary-dark text-white">
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Logged in as</p>

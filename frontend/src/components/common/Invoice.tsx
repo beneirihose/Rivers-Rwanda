@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+// @ts-ignore
 import logo from '../../assets/images/logo.png';
 import { X, Download } from 'lucide-react';
 

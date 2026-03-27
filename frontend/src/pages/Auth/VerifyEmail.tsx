@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { MailCheck } from 'lucide-react';

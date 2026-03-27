@@ -34,6 +34,15 @@ const ProductManagement = () => {
     return <Building2 size={18} className="text-orange-500" />;
   };
 
+  const statusColors: Record<string, string> = {
+    pending_approval: 'bg-yellow-100 text-yellow-700',
+    available: 'bg-green-100 text-green-700',
+    rejected: 'bg-red-100 text-red-700',
+    rented: 'bg-blue-100 text-blue-700',
+    sold: 'bg-purple-100 text-purple-700',
+    unavailable: 'bg-gray-100 text-gray-700'
+  };
+
   return (
     <div className="p-6 md:p-10 bg-gray-50 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
@@ -93,13 +102,7 @@ const ProductManagement = () => {
                         </span>
                     </td>
                     <td className="p-6">
-                        <span className={`px-4 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-full ${{
-                        pending_approval: 'bg-yellow-100 text-yellow-700',
-                        available: 'bg-green-100 text-green-700',
-                        rejected: 'bg-red-100 text-red-700',
-                        rented: 'bg-blue-100 text-blue-700',
-                        sold: 'bg-purple-100 text-purple-700',
-                        }[product.status] || 'bg-gray-100 text-gray-700'}`}>
+                        <span className={`px-4 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-full ${statusColors[product.status] || 'bg-gray-100 text-gray-700'}`}>
                         {product.status.replace('_', ' ')}
                         </span>
                     </td>

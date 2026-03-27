@@ -1,0 +1,40 @@
+import { RowDataPacket } from 'mysql2';
+export interface House extends RowDataPacket {
+    id: string;
+    seller_id: string | null;
+    purpose: 'rent' | 'sale' | 'both';
+    title: string;
+    description: string;
+    size_sqm: number;
+    total_rooms: number;
+    bedrooms: number;
+    bathrooms: number;
+    balconies: number;
+    kitchen_type: 'inside' | 'outside' | 'both';
+    toilet_type: 'inside' | 'outside' | 'both';
+    material_used: 'block_sima' | 'ruriba' | 'mpunyu' | 'rukarakara' | 'other';
+    ceiling_type: 'plafond' | 'roof' | 'none';
+    has_tiles: boolean;
+    has_electricity: boolean;
+    has_water: boolean;
+    has_parking: boolean;
+    has_garden: boolean;
+    has_wifi: boolean;
+    amenities: any;
+    images: any;
+    province: string;
+    district: string;
+    sector: string;
+    full_address: string;
+    monthly_rent_price?: number;
+    purchase_price?: number;
+    status: 'pending_approval' | 'available' | 'under maintenance' | 'rented' | 'purchased' | 'rejected';
+    created_at: Date;
+}
+export declare const getAllHouses: (filters: any) => Promise<House[]>;
+export declare const getHouseById: (id: string) => Promise<House | null>;
+export declare const createHouse: (data: any) => Promise<string>;
+export declare const updateHouse: (id: string, data: any) => Promise<void>;
+export declare const updateHouseStatus: (id: string, status: string) => Promise<void>;
+export declare const deleteHouse: (id: string) => Promise<void>;
+//# sourceMappingURL=House.model.d.ts.map

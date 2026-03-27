@@ -1,12 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { 
-  Home, Plus, Edit2, Trash2, X, Upload, XCircle, MapPin, Ruler, BedDouble, Bath, Layout, Utensils, Construction, Zap, Droplets, Wifi, Car, TreePine, ImageIcon, Grid3X3, Layers 
+  Plus, Edit2, Trash2, X, Image as ImageIcon, XCircle, MapPin, BedDouble, Bath, Layout, Construction, Zap, Droplets, Wifi, Car, TreePine, Grid3X3, Home
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1';
 const SERVER_BASE_URL = API_BASE_URL.split('/api/v1')[0];
 
 const HouseManagement = () => {

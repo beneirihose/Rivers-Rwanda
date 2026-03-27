@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe, Facebook, Instagram, Twitter, Linkedin, ChevronDown, User } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe, Facebook, Instagram, Twitter, Linkedin, ChevronDown, User, Youtube } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -35,7 +35,10 @@ const Contact = () => {
     }
   };
 
-  const mapSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.502834375!2d30.0631!3d-1.9441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca425b5254945%3A0x27438478f7e8979e!2sUniversity%20of%20Lay%20Adventists%20of%20Kigali%20(UNILAK)!5e0!3m2!1sen!2srw!4v1700000000000!5m2!1sen!2srw";
+  const externalMapLink = "https://www.google.com/maps/@-1.9666037,30.0970127,991m/data=!3m1!1e3?hl=en&entry=ttu&g_ep=EgoyMDI2MDMyNC4wIKXMDSoASAFQAw%3D%3D";
+  
+  // Refined Embed URL for coordinate mapping
+  const embedMapUrl = "https://maps.google.com/maps?ll=-1.9666037,30.0970127&q=-1.9666037,30.0970127&hl=en&t=m&z=15&output=embed";
 
   const faqs = [
     {
@@ -44,12 +47,20 @@ const Contact = () => {
     },
     {
       q: t('contact.faq2Q', { defaultValue: "Can I visit your office in person?" }),
-      a: t('contact.faq2A', { defaultValue: "Yes! We welcome visitors at our office located at UNILAK, Kigali." })
+      a: t('contact.faq2A', { defaultValue: "Yes! We welcome visitors at our office located at Kigali-Gasabo KG 601st." })
     },
     {
       q: t('contact.faq3Q', { defaultValue: "How do I list my property?" }),
       a: t('contact.faq3A', { defaultValue: "You can register as a Seller/Agent on our platform." })
     }
+  ];
+
+  const socialLinks = [
+    { icon: Facebook, url: "https://www.facebook.com/profile.php?id=61585040398721" },
+    { icon: Twitter, url: "https://x.com/RiversRwanda1" },
+    { icon: Instagram, url: "https://www.instagram.com/reel/DVAxu4fE4Fv/?igsh=MTdxbDBsbXMzaG1lNw==" },
+    { icon: Linkedin, url: "https://www.linkedin.com/in/rivers-rwanda-8763363b5" },
+    { icon: Youtube, url: "https://www.youtube.com/@riversrwanda" }
   ];
 
   return (
@@ -97,7 +108,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('contact.office')}</p>
-                    <p className="text-sm font-bold text-primary-dark leading-relaxed">University of Lay Adventists of Kigali, KK 508 St, Kigali, Rwanda</p>
+                    <p className="text-sm font-bold text-primary-dark leading-relaxed font-mono text-accent-orange uppercase tracking-tighter">Kigali-Gasabo KG 601st</p>
                   </div>
                 </div>
 
@@ -108,6 +119,7 @@ const Contact = () => {
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('contact.directLine')}</p>
                     <p className="text-sm font-bold text-primary-dark">+250 792 659 094</p>
+                     <p className="text-sm font-bold text-primary-dark">+250 785 288 933</p>
                     <p className="text-xs text-gray-400 font-medium mt-1">{t('contact.support247')}</p>
                   </div>
                 </div>
@@ -127,9 +139,15 @@ const Contact = () => {
               <div className="mt-12 pt-8 border-t border-gray-100">
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 text-center">{t('contact.followJourney')}</p>
                 <div className="flex justify-center gap-4">
-                  {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
-                    <a key={i} href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-accent-orange hover:text-white hover:-translate-y-1 transition-all duration-300">
-                      <Icon size={18} />
+                  {socialLinks.map((social, i) => (
+                    <a 
+                      key={i} 
+                      href={social.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-accent-orange hover:text-white hover:-translate-y-1 transition-all duration-300"
+                    >
+                      <social.icon size={18} />
                     </a>
                   ))}
                 </div>
@@ -145,16 +163,21 @@ const Contact = () => {
             >
               <iframe
                 title="Office Location"
-                src={mapSrc}
+                src={embedMapUrl}
                 className="w-full h-full rounded-[1.5rem] grayscale hover:grayscale-0 transition-all duration-700"
                 loading="lazy"
                 style={{ border: 0 }}
               ></iframe>
-              <div className="absolute bottom-6 right-6 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="bg-primary-dark text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <Globe size={12} className="text-accent-orange animate-spin-slow" /> {t('contact.openMaps')}
+              <a 
+                href={externalMapLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <div className="bg-primary-dark text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl hover:bg-accent-orange transition-colors">
+                  <Globe size={12} className="text-white animate-spin-slow" /> {t('contact.openMaps')}
                 </div>
-              </div>
+              </a>
             </motion.div>
           </div>
 

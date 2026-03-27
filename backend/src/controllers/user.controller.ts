@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { query } from '../database/connection';
 import { TokenPayload } from '../utils/jwt.utils';
+import bcrypt from 'bcryptjs';
 
 interface AuthenticatedRequest extends Request {
   user?: TokenPayload;
@@ -129,6 +130,41 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response, ne
         res.status(200).json({ success: true, message: 'Profile updated successfully' });
     } catch (error: any) {
         console.error('[UPDATE PROFILE ERROR]:', error.message);
+        next(error);
+    }
+};
+
+export const changePassword = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.userId;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Current and new passwords are required' });
+        }
+
+        // 1. Get user password hash
+        const [user] = await query<any[]>('SELECT password_hash FROM users WHERE id = ?', [userId]);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // 2. Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Incorrect current password' });
+        }
+
+        // 3. Hash new password and update
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        await query('UPDATE users SET password_hash = ? WHERE id = ?', [hashedPassword, userId]);
+
+        res.status(200).json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
         next(error);
     }
 };

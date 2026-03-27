@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Tag, MapPin, Star, Gauge, Fuel, Settings, ChevronRight, Car } from 'lucide-react';
+import { Gauge, Fuel, Settings, Car } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import ImageGallery from '../../components/common/ImageGallery';

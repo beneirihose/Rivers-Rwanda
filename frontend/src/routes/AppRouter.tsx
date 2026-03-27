@@ -55,6 +55,7 @@ import AddHouseForm from '../pages/Seller/AddHouseForm';
 import AddAccommodationForm from '../pages/Seller/AddAccommodationForm';
 import AddVehicleForm from '../pages/Seller/AddVehicleForm';
 import SellerEarnings from '../pages/Seller/SellerEarnings';
+import SellerBookings from '../pages/Seller/SellerBookings';
 
 // Common Dashboard Pages
 import Profile from '../pages/Profile/Profile';
@@ -169,6 +170,7 @@ const AppContent = () => {
               <DashboardLayout role="seller">
                 <Routes>
                   <Route path="dashboard" element={<SellerDashboard />} />
+                  <Route path="bookings" element={<SellerBookings />} />
                   <Route path="products" element={<ProductManagement />} />
                   <Route path="products/new" element={<AddProduct />} />
                   <Route path="products/new/house" element={<AddHouseForm />} />

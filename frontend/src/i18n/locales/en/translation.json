@@ -187,7 +187,7 @@
     "privateGarden": "Private Garden",
     "gym": "Gym / Fitness",
     "kitchen": "Kitchen",
-    "toilet": "Toilet",
+    "bathroom": "Bathroom",
     "livingRoom": "Living Room",
     "swimmingPool": "Swimming Pool",
     "decoration": "Decoration Incl.",
@@ -423,7 +423,19 @@
     },
     "seller": {
       "title": "Seller Dashboard",
-      "subtitle": "Welcome to your dashboard. Here you can manage your products and view your sales."
+      "subtitle": "Welcome to your dashboard. Here you can manage your products and view your sales.",
+      "stats": {
+        "products": "Total Products",
+        "bookings": "Total Bookings",
+        "pending": "Pending Requests",
+        "earnings": "Total Earnings"
+      },
+      "actions": {
+        "title": "Quick Actions",
+        "addProduct": "Add New Product",
+        "viewEarnings": "View Earnings"
+      },
+      "recentBookings": "Recent Bookings"
     }
   }
 }

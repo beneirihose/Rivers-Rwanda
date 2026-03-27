@@ -1,0 +1,37 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_routes_1 = __importDefault(require("./auth.routes"));
+const user_routes_1 = __importDefault(require("./user.routes"));
+const seller_routes_1 = __importDefault(require("./seller.routes"));
+const accommodation_routes_1 = __importDefault(require("./accommodation.routes"));
+const vehicle_routes_1 = __importDefault(require("./vehicle.routes"));
+const house_routes_1 = __importDefault(require("./house.routes"));
+const booking_routes_1 = __importDefault(require("./booking.routes"));
+const payment_routes_1 = __importDefault(require("./payment.routes"));
+const admin_routes_1 = __importDefault(require("./admin.routes"));
+const agent_routes_1 = __importDefault(require("./agent.routes"));
+const contact_routes_1 = __importDefault(require("./contact.routes"));
+const review_routes_1 = __importDefault(require("./review.routes"));
+const public_routes_1 = __importDefault(require("./public.routes"));
+const notification_routes_1 = __importDefault(require("./notification.routes"));
+const router = (0, express_1.Router)();
+router.use('/auth', auth_routes_1.default);
+router.use('/users', user_routes_1.default);
+router.use('/sellers', seller_routes_1.default);
+router.use('/accommodations', accommodation_routes_1.default);
+router.use('/vehicles', vehicle_routes_1.default);
+router.use('/houses', house_routes_1.default);
+router.use('/bookings', booking_routes_1.default);
+router.use('/payments', payment_routes_1.default);
+router.use('/admin', admin_routes_1.default);
+router.use('/agents', agent_routes_1.default);
+router.use('/contact', contact_routes_1.default);
+router.use('/reviews', review_routes_1.default);
+router.use('/public', public_routes_1.default);
+router.use('/notifications', notification_routes_1.default);
+exports.default = router;
+//# sourceMappingURL=index.js.map

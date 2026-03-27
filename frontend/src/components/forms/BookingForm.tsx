@@ -7,7 +7,6 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Banknote, Smartphone, Calendar as CalendarIcon } from 'lucide-react';
 import SuccessModal from '../common/SuccessModal';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 // --- Schema for the form ---
@@ -22,8 +21,10 @@ const schema = z.object({
     z.number().min(2, 'Minimum rental period is 2 months').optional()
   ),
   payment_method: z.enum(['bank_transfer', 'mobile_money']),
-  payment_proof: z.any().refine(files => files?.length > 0, 'Payment proof is required.'),
+  payment_proof: z.any().refine(files => files && files.length > 0, 'Payment proof is required.'),
 });
+
+type FormData = z.infer<typeof schema>;
 
 const paymentDetails = {
   bank: { name: 'I&M Bank', accountNumber: '20151404001', accountName: 'MVL Group Ltd' },
@@ -37,10 +38,13 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
   const [modalOpen, setModalOpen] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
 
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({ 
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormData>({ 
     resolver: zodResolver(schema),
     defaultValues: { 
-        payment_method: 'bank_transfer', 
+        fullName: '',
+        email: '',
+        phone: '',
+        payment_method: 'bank_transfer' as const, 
         numMonths: 2,
         startDate: new Date().toISOString().split('T')[0]
     }
@@ -48,7 +52,6 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
   const paymentMethod = watch('payment_method');
   const startDate = watch('startDate');
-  const endDate = watch('endDate');
   const numMonths = watch('numMonths');
 
   const isHouseRent = itemType === 'house' && item.monthly_rent_price;
@@ -76,9 +79,10 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
     } else if (isAccommodation || isVehicleRent) {
       const dailyRate = isAccommodation ? (item.price_per_night || item.price_per_event || 0) : (item.daily_rate || 0);
       
-      if (startDate && endDate) {
+      const watchEndDate = (watch as any)('endDate');
+      if (startDate && watchEndDate) {
         const start = new Date(startDate);
-        const end = new Date(endDate);
+        const end = new Date(watchEndDate);
         const diffTime = end.getTime() - start.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
@@ -96,17 +100,21 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
     setTotalAmount(Math.round(amount));
     setDisplayDuration(label);
-  }, [startDate, endDate, numMonths, item, itemType, isHouseRent, isHousePurchase, isVehicleRent, isVehiclePurchase, isAccommodation, t]);
+  }, [startDate, numMonths, item, itemType, isHouseRent, isHousePurchase, isVehicleRent, isVehiclePurchase, isAccommodation, t, watch]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
     const formData = new FormData();
 
     Object.keys(data).forEach(key => {
-      if (key === 'payment_proof') {
-        if (data.payment_proof[0]) formData.append('payment_proof', data.payment_proof[0]);
-      } else if (key !== 'numMonths') {
-        formData.append(key, data[key]);
+      const field = key as keyof FormData;
+      if (field === 'payment_proof') {
+        if (data.payment_proof && data.payment_proof[0]) formData.append('payment_proof', data.payment_proof[0]);
+      } else if (field !== 'numMonths') {
+        const value = data[field];
+        if (value !== undefined) {
+          formData.append(field, value.toString());
+        }
       }
     });
     
@@ -129,7 +137,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
 
     if (isHouseRent && data.startDate && data.numMonths) {
         const start = new Date(data.startDate);
-        const end = new Date(start.setMonth(start.getMonth() + parseInt(data.numMonths)));
+        const end = new Date(start.setMonth(start.getMonth() + parseInt(String(data.numMonths))));
         formData.append('end_date', end.toISOString().split('T')[0]);
     } else if (data.endDate) {
         formData.append('end_date', data.endDate);
@@ -183,16 +191,16 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <input {...register('fullName')} placeholder={t('contact.fullName')} className={inputStyles} />
-            {errors.fullName && <p className={errorStyles}>{errors.fullName.message as string}</p>}
+            {errors.fullName?.message && <p className={errorStyles}>{String(errors.fullName.message)}</p>}
           </div>
           <div>
             <input {...register('email')} placeholder={t('auth.emailLabel')} className={inputStyles} />
-            {errors.email && <p className={errorStyles}>{errors.email.message as string}</p>}
+            {errors.email?.message && <p className={errorStyles}>{String(errors.email.message)}</p>}
           </div>
         </div>
         <div>
           <input {...register('phone')} placeholder={t('auth.phoneLabel')} className={inputStyles} />
-          {errors.phone && <p className={errorStyles}>{errors.phone.message as string}</p>}
+          {errors.phone?.message && <p className={errorStyles}>{String(errors.phone.message)}</p>}
         </div>
 
         {/* --- DYNAMIC DATE/DURATION FIELDS --- */}
@@ -205,7 +213,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
                 <div>
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-1">{t('booking.startDate')}</label>
                     <input {...register('startDate')} type="date" className={`${inputStyles} mt-1`} min={new Date().toISOString().split('T')[0]} />
-                    {errors.startDate && <p className={errorStyles}>{errors.startDate.message as string}</p>}
+                    {errors.startDate?.message && <p className={errorStyles}>{String(errors.startDate.message)}</p>}
                 </div>
 
                 {/* For House Rent: Number of Months Input */}
@@ -213,7 +221,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
                     <div>
                         <label className="text-[9px] font-black text-gray-400 uppercase ml-1">{t('booking.rentalDuration')}</label>
                         <input {...register('numMonths')} type="number" min="2" placeholder={t('booking.min2Months')} className={`${inputStyles} mt-1`} />
-                        {errors.numMonths && <p className={errorStyles}>{errors.numMonths.message as string}</p>}
+                        {errors.numMonths?.message && <p className={errorStyles}>{String(errors.numMonths.message)}</p>}
                     </div>
                 )}
 
@@ -222,7 +230,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
                     <div>
                         <label className="text-[9px] font-black text-gray-400 uppercase ml-1">{t('booking.endDate')}</label>
                         <input {...register('endDate')} type="date" className={`${inputStyles} mt-1`} min={startDate} />
-                        {errors.endDate && <p className={errorStyles}>{errors.endDate.message as string}</p>}
+                        {errors.endDate?.message && <p className={errorStyles}>{String(errors.endDate.message)}</p>}
                     </div>
                 )}
             </div>
@@ -260,7 +268,7 @@ const BookingForm = ({ item, itemType }: { item: any, itemType: 'house' | 'vehic
         <div>
           <label className="text-xs font-bold text-gray-300 uppercase ml-2">{t('booking.uploadProof')}</label>
           <input {...register('payment_proof')} type="file" accept=".jpg,.jpeg,.png,.pdf" className={`${inputStyles} p-2 mt-1`} />
-          {errors.payment_proof && <p className={errorStyles}>{errors.payment_proof.message as string}</p>}
+          {errors.payment_proof?.message && <p className={errorStyles}>{String(errors.payment_proof.message)}</p>}
         </div>
         
         <button type="submit" disabled={loading} className="w-full bg-accent-orange text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-primary-dark transition-all duration-500 shadow-xl relative z-10">

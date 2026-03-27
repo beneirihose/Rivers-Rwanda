@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { User, Mail, Phone, Camera, Save, Shield, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { User, Mail, Phone, Camera, Save, Shield, CheckCircle2, Lock, Eye, EyeOff, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -15,6 +15,17 @@ const Profile = () => {
     firstName: '',
     lastName: '',
     phoneNumber: ''
+  });
+
+  // Password Change State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [passData, setPassData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   useEffect(() => {
@@ -75,12 +86,36 @@ const Profile = () => {
       
       toast.success('Profile updated successfully');
       fetchProfile();
-      // Reload page to update header image/name
       setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       toast.error('Failed to update profile');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passData.newPassword !== passData.confirmPassword) {
+        return toast.error('New passwords do not match');
+    }
+    if (passData.newPassword.length < 6) {
+        return toast.error('Password must be at least 6 characters');
+    }
+
+    setPasswordLoading(true);
+    try {
+        await api.post('/users/change-password', {
+            currentPassword: passData.currentPassword,
+            newPassword: passData.newPassword
+        });
+        toast.success('Password changed successfully');
+        setShowPasswordModal(false);
+        setPassData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+        toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+        setPasswordLoading(false);
     }
   };
 
@@ -235,7 +270,7 @@ const Profile = () => {
         </div>
       </motion.div>
 
-      {/* Security Section (Coming Soon) */}
+      {/* Security Section */}
       <div className="mt-8 bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-lg flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
@@ -246,8 +281,116 @@ const Profile = () => {
             <p className="text-xs text-text-light mt-1">Manage your password and session security.</p>
           </div>
         </div>
-        <button className="text-accent-orange font-black text-[10px] uppercase tracking-widest hover:underline">Change Password</button>
+        <button 
+            onClick={() => setShowPasswordModal(true)}
+            className="text-accent-orange font-black text-[10px] uppercase tracking-widest hover:underline"
+        >
+            Change Password
+        </button>
       </div>
+
+      {/* --- CHANGE PASSWORD MODAL --- */}
+      <AnimatePresence>
+        {showPasswordModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowPasswordModal(false)}
+                    className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm"
+                />
+                <motion.div 
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="relative bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden"
+                >
+                    <div className="p-8 bg-primary-dark text-white flex justify-between items-center">
+                        <div>
+                            <h3 className="text-xl font-black uppercase tracking-tighter leading-none">Security Update</h3>
+                            <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mt-1">Change Account Password</p>
+                        </div>
+                        <button 
+                            onClick={() => setShowPasswordModal(false)}
+                            className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-all"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    <form onSubmit={handlePasswordChange} className="p-8 space-y-6">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">Current Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-4 text-gray-300" size={18} />
+                                <input 
+                                    type={showCurrentPass ? 'text' : 'password'}
+                                    className="w-full p-4 pl-12 pr-12 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-accent-orange focus:bg-white outline-none font-bold text-sm transition-all"
+                                    placeholder="••••••••"
+                                    value={passData.currentPassword}
+                                    onChange={(e) => setPassData({...passData, currentPassword: e.target.value})}
+                                    required
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowCurrentPass(!showCurrentPass)}
+                                    className="absolute right-4 top-4 text-gray-300 hover:text-accent-orange"
+                                >
+                                    {showCurrentPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">New Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-4 text-gray-300" size={18} />
+                                <input 
+                                    type={showNewPass ? 'text' : 'password'}
+                                    className="w-full p-4 pl-12 pr-12 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-accent-orange focus:bg-white outline-none font-bold text-sm transition-all"
+                                    placeholder="••••••••"
+                                    value={passData.newPassword}
+                                    onChange={(e) => setPassData({...passData, newPassword: e.target.value})}
+                                    required
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowNewPass(!showNewPass)}
+                                    className="absolute right-4 top-4 text-gray-300 hover:text-accent-orange"
+                                >
+                                    {showNewPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">Confirm New Password</label>
+                            <div className="relative">
+                                <Shield className="absolute left-4 top-4 text-gray-300" size={18} />
+                                <input 
+                                    type="password"
+                                    className="w-full p-4 pl-12 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-accent-orange focus:bg-white outline-none font-bold text-sm transition-all"
+                                    placeholder="••••••••"
+                                    value={passData.confirmPassword}
+                                    onChange={(e) => setPassData({...passData, confirmPassword: e.target.value})}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit"
+                            disabled={passwordLoading}
+                            className="w-full py-5 bg-accent-orange text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-accent-orange/20 hover:bg-primary-dark transition-all disabled:opacity-50"
+                        >
+                            {passwordLoading ? 'Updating...' : 'Update Password'}
+                        </button>
+                    </form>
+                </motion.div>
+            </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

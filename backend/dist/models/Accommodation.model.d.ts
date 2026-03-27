@@ -1,0 +1,44 @@
+import { RowDataPacket } from 'mysql2';
+export interface Accommodation extends RowDataPacket {
+    id: string;
+    seller_id: string | null;
+    type: 'apartment' | 'hotel_room' | 'event_hall';
+    sub_type?: 'whole' | 'room';
+    purpose: 'rent' | 'sale' | 'both';
+    name: string;
+    description: string;
+    city: string;
+    district: string;
+    price_per_night?: number;
+    price_per_event?: number;
+    sale_price?: number;
+    max_guests?: number;
+    capacity?: number;
+    wifi: boolean;
+    parking: boolean;
+    garden: boolean;
+    decoration: boolean;
+    sonolization: boolean;
+    gym: boolean;
+    kitchen: boolean;
+    toilet: boolean;
+    living_room: boolean;
+    swimming_pool: boolean;
+    number_of_living_rooms?: number;
+    floor_number?: number;
+    room_name_number?: string;
+    bed_type?: 'single' | 'double' | 'triple' | 'other';
+    has_elevator?: boolean;
+    is_furnished?: boolean;
+    status: 'pending_approval' | 'available' | 'unavailable' | 'maintenance' | 'rejected';
+    images: any;
+    amenities: any;
+    created_at: Date;
+}
+export declare const getAllAccommodations: (filters: any) => Promise<Accommodation[]>;
+export declare const getAccommodationById: (id: string) => Promise<Accommodation | null>;
+export declare const createAccommodation: (data: any) => Promise<string>;
+export declare const updateAccommodation: (id: string, data: any) => Promise<void>;
+export declare const updateAccommodationStatus: (id: string, status: string) => Promise<void>;
+export declare const deleteAccommodation: (id: string) => Promise<void>;
+//# sourceMappingURL=Accommodation.model.d.ts.map

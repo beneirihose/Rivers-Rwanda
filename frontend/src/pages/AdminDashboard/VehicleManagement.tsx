@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Car, Plus, Edit2, Trash2, X, Upload, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Upload, XCircle } from 'lucide-react';
 
 const VehicleManagement = () => {
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -138,10 +138,10 @@ const VehicleManagement = () => {
   const renderImagePreviews = () => (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-4">
       {existingImages.map((img, i) => (
-          <div key={`existing-${i}`} className="relative group aspect-square"><img src={`http://localhost:5000${img}`} className="w-full h-full object-cover rounded-lg border-2"/><button type="button" onClick={() => removeExistingImage(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"><XCircle size={20}/></button></div>
+          <div key={`existing-${i}`} className="relative group aspect-square"><img src={`http://localhost:5000${img}`} className="w-full h-full object-cover rounded-lg border-2" alt="" /><button type="button" onClick={() => removeExistingImage(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"><XCircle size={20}/></button></div>
       ))}
       {imagePreviews.map((preview, i) => (
-          <div key={`new-${i}`} className="relative group aspect-square"><img src={preview} className="w-full h-full object-cover rounded-lg border-2 border-accent-orange"/><button type="button" onClick={() => removeNewImage(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"><XCircle size={20}/></button></div>
+          <div key={`new-${i}`} className="relative group aspect-square"><img src={preview} className="w-full h-full object-cover rounded-lg border-2 border-accent-orange" alt="" /><button type="button" onClick={() => removeNewImage(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"><XCircle size={20}/></button></div>
       ))}
     </div>
   );

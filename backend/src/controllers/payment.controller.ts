@@ -100,31 +100,42 @@ export const confirmPayment = async (req: Request, res: Response, next: NextFunc
             await VehicleModel.updateVehicleStatus(booking.vehicle_id, booking.booking_type.includes('purchase') ? 'sold' : 'rented');
         }
 
-        // 5. Calculate & Record Commissions (10% System, 5% Agent)
+        // 5. Calculate & Record Commissions
         const totalAmount = Number(booking.total_amount);
-        const systemFee = totalAmount * 0.10;
         let agentFee = 0;
 
         if (booking.agent_id) {
-            agentFee = totalAmount * 0.05;
+            agentFee = totalAmount * 0.03;
             await CommissionModel.createCommission({
                 booking_id: bookingId,
                 amount: agentFee,
                 commission_type: 'agent',
                 agent_id: booking.agent_id,
-                status: 'pending'
+                status: 'approved'
             });
         }
 
+        if (sellerId) {
+            const sellerPayout = totalAmount * 0.90;
+            await CommissionModel.createCommission({
+                booking_id: bookingId,
+                amount: sellerPayout,
+                commission_type: 'seller_payout',
+                seller_id: sellerId,
+                status: 'approved'
+            });
+        }
+
+        const systemFeeRate = booking.agent_id ? 0.07 : 0.10;
+        const systemFee = totalAmount * systemFeeRate;
         await CommissionModel.createCommission({
             booking_id: bookingId,
             amount: systemFee,
             commission_type: 'system',
-            seller_id: sellerId || undefined,
             status: 'approved'
         });
 
-        const netAmount = totalAmount - systemFee - agentFee;
+        const netAmount = totalAmount - (totalAmount * 0.10);
 
         // 6. Notify Seller
         if (sellerId) {
