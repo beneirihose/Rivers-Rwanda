@@ -1,93 +1,75 @@
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-// Ensure the base upload directory exists
-const baseDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(baseDir)) {
-  fs.mkdirSync(baseDir, { recursive: true });
-}
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Function to create storage engine for a specific type
-const createStorage = (subfolder: string) => {
-  const storageDir = path.join(baseDir, subfolder);
-  if (!fs.existsSync(storageDir)) {
-    fs.mkdirSync(storageDir, { recursive: true });
-  }
-
-  return multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, storageDir);
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const extension = path.extname(file.originalname);
-      cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
-    }
+// Function to create Cloudinary storage for a specific folder
+const createCloudinaryStorage = (folder: string, allowPdf = false) => {
+  return new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: `rivers-rwanda/${folder}`,
+      allowed_formats: allowPdf ? ['jpg', 'jpeg', 'png', 'webp', 'pdf'] : ['jpg', 'jpeg', 'png', 'webp'],
+      resource_type: 'auto',
+    } as any,
   });
 };
 
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const imageFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = /jpeg|jpg|png|webp/;
   const mimetype = allowedTypes.test(file.mimetype);
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-
-  if (mimetype && extname) {
-    return cb(null, true);
-  }
+  if (mimetype && extname) return cb(null, true);
   cb(new Error('Invalid file type. Only JPG, PNG, WEBP are allowed.'));
 };
 
+const documentFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = /jpeg|jpg|png|pdf/;
+  const mimetype = allowedTypes.test(file.mimetype);
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  if (mimetype && extname) return cb(null, true);
+  cb(new Error('Invalid file type. Only JPG, PNG, and PDF are allowed.'));
+};
+
 export const uploadAccommodationImages = multer({
-  storage: createStorage('accommodations'),
-  fileFilter: fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 } // 5MB
+  storage: createCloudinaryStorage('accommodations'),
+  fileFilter: imageFileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 },
 }).array('images', 5);
 
 export const uploadVehicleImages = multer({
-  storage: createStorage('vehicles'),
-  fileFilter: fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 }
+  storage: createCloudinaryStorage('vehicles'),
+  fileFilter: imageFileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 },
 }).array('images', 5);
 
 export const uploadHouseImages = multer({
-  storage: createStorage('houses'),
-  fileFilter: fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 }
+  storage: createCloudinaryStorage('houses'),
+  fileFilter: imageFileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 },
 }).array('images', 10);
 
 export const uploadProfileImage = multer({
-  storage: createStorage('profiles'),
-  fileFilter: fileFilter,
-  limits: { fileSize: 1024 * 1024 * 2 } // 2MB for profile pictures
+  storage: createCloudinaryStorage('profiles'),
+  fileFilter: imageFileFilter,
+  limits: { fileSize: 1024 * 1024 * 2 },
 }).single('profile_image');
 
 export const uploadPaymentProof = multer({
-  storage: createStorage('payment-proofs'),
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|pdf/;
-    const mimetype = allowedTypes.test(file.mimetype);
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Invalid file type. Only JPG, PNG, and PDF are allowed.'));
-  },
-  limits: { fileSize: 1024 * 1024 * 5 } // 5MB
+  storage: createCloudinaryStorage('payment-proofs', true),
+  fileFilter: documentFileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 },
 }).single('payment_proof');
 
 export const uploadPayoutProof = multer({
-  storage: createStorage('payout-proofs'),
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|pdf/;
-    const mimetype = allowedTypes.test(file.mimetype);
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Invalid file type. Only JPG, PNG, and PDF are allowed.'));
-  },
-  limits: { fileSize: 1024 * 1024 * 5 } // 5MB
+  storage: createCloudinaryStorage('payout-proofs', true),
+  fileFilter: documentFileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 },
 }).single('payout_proof');
