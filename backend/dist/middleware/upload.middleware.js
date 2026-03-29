@@ -8,11 +8,9 @@ const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const cloudinary_1 = require("cloudinary");
 const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
-// Configure Cloudinary
+// Configure Cloudinary using CLOUDINARY_URL
 cloudinary_1.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloudinary_url: process.env.CLOUDINARY_URL,
 });
 // Function to create Cloudinary storage for a specific folder
 const createCloudinaryStorage = (folder, allowPdf = false) => {
