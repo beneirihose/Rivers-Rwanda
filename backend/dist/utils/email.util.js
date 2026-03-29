@@ -7,18 +7,20 @@ exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-// Create transporter
-// For Gmail, it's recommended to use 'service: gmail' which handles ports and SSL/TLS automatically
 const transporter = nodemailer_1.default.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
+    tls: {
+        rejectUnauthorized: false
+    }
 });
 const sendEmail = async (options) => {
     try {
-        // Verify connection configuration
         await transporter.verify();
         await transporter.sendMail({
             from: `"Rivers Rwanda" <${process.env.EMAIL_FROM}>`,
@@ -30,12 +32,11 @@ const sendEmail = async (options) => {
     }
     catch (error) {
         console.error('Error sending email:', error);
-        // Provide more descriptive error messages for debugging
         if (error.code === 'EDNS' || error.code === 'ETIMEOUT') {
-            throw new Error('Network/DNS error: Could not reach the email server. Please check your internet connection.');
+            throw new Error('Network/DNS error: Could not reach the email server.');
         }
         if (error.code === 'EAUTH') {
-            throw new Error('Email authentication failed. Please check your EMAIL_USER and EMAIL_PASS (App Password).');
+            throw new Error('Email authentication failed. Please check your EMAIL_USER and EMAIL_PASS.');
         }
         throw new Error('Could not send email.');
     }
