@@ -93,7 +93,7 @@ export const createAccommodation = async (req: AuthenticatedRequest, res: Respon
     const imagePaths: string[] = [];
     if (req.files) {
       (req.files as Express.Multer.File[]).forEach(file => {
-        imagePaths.push(`/uploads/accommodations/${path.basename(file.path)}`);
+        imagePaths.push(file.path);
       });
     }
 
@@ -123,7 +123,7 @@ export const updateAccommodation = async (req: AuthenticatedRequest, res: Respon
     }
 
     if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-        const newImages = (req.files as Express.Multer.File[]).map(f => `/uploads/accommodations/${path.basename(f.path)}`);
+        const newImages = (req.files as Express.Multer.File[]).map(f => f.path);
         finalImages = [...finalImages, ...newImages];
     }
 

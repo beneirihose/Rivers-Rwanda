@@ -10,6 +10,13 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const getImageSrc = (image: string) => {
+    if (image.startsWith('http')) {
+      return image;
+    }
+    return `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://rivers-rwanda-production.up.railway.app'}${image}`;
+  };
+
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
@@ -37,7 +44,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         <AnimatePresence initial={false}>
             <motion.img
                 key={currentIndex}
-                src={`http://localhost:5000${images[currentIndex]}`}
+                src={getImageSrc(images[currentIndex])}
                 alt={`Image ${currentIndex + 1}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -58,7 +65,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             key={index} 
             onClick={() => setCurrentIndex(index)} 
             className={`aspect-square rounded-md overflow-hidden cursor-pointer border-2 transition-all ${currentIndex === index ? 'border-accent-orange' : 'border-transparent hover:border-gray-400'}`}>
-            <img src={`http://localhost:5000${image}`} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+            <img src={getImageSrc(image)} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
           </div>
         ))}
       </div>
@@ -77,7 +84,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
                 initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} transition={{ duration: 0.3 }}
                 className="relative w-full max-w-4xl h-[80vh] bg-black" onClick={(e) => e.stopPropagation()}
             >
-                <img src={`http://localhost:5000${images[currentIndex]}`} className="w-full h-full object-contain"/>
+                <img src={getImageSrc(images[currentIndex])} className="w-full h-full object-contain"/>
                 <button onClick={handlePrev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 text-white p-2 rounded-full hover:bg-white/40 transition-all"><ChevronLeft size={32}/></button>
                 <button onClick={handleNext} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 text-white p-2 rounded-full hover:bg-white/40 transition-all"><ChevronRight size={32}/></button>
                 <button onClick={closeModal} className="absolute top-2 right-2 bg-white/20 text-white p-2 rounded-full hover:bg-white/40 transition-all"><X size={24}/></button>

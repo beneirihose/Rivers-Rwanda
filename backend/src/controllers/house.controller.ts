@@ -110,7 +110,7 @@ export const createHouse = async (req: AuthenticatedRequest, res: Response, next
     sanitizedData.status = initialStatus;
 
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        const imagePaths = req.files.map((file: any) => `/uploads/houses/${path.basename(file.path)}`);
+        const imagePaths = req.files.map((file: any) => file.path);
         sanitizedData.images = JSON.stringify(imagePaths);
     }
 
@@ -140,7 +140,7 @@ export const updateHouse = async (req: Request, res: Response, next: NextFunctio
     }
 
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        const newImages = req.files.map((file: any) => `/uploads/houses/${path.basename(file.path)}`);
+        const newImages = req.files.map((file: any) => file.path);
         finalImages = [...finalImages, ...newImages];
     }
 

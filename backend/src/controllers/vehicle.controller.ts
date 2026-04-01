@@ -73,8 +73,7 @@ export const createVehicle = async (req: AuthenticatedRequest, res: Response, ne
     const imagePaths: string[] = [];
     if (req.files && Array.isArray(req.files)) {
       req.files.forEach((file: any) => {
-        const urlPath = `/uploads/vehicles/${path.basename(file.path)}`;
-        imagePaths.push(urlPath);
+        imagePaths.push(file.path);
       });
     }
 
@@ -103,7 +102,7 @@ export const updateVehicle = async (req: Request, res: Response, next: NextFunct
     const data = { ...req.body };
 
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      const newImagePaths: string[] = req.files.map((file: any) => `/uploads/vehicles/${path.basename(file.path)}`);
+      const newImagePaths: string[] = req.files.map((file: any) => file.path);
       data.images = JSON.stringify(newImagePaths);
     }
 

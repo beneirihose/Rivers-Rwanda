@@ -84,7 +84,7 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response, ne
         
         const body = req.body || {};
         const { firstName, lastName, phoneNumber } = body;
-        const profileImage = req.file ? `/uploads/profiles/${req.file.filename}` : undefined;
+        const profileImage = req.file ? req.file.path : undefined;
 
         if (!userId || !role) {
             return res.status(401).json({ success: false, message: 'Not authenticated' });
