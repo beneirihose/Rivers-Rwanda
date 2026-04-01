@@ -177,7 +177,7 @@ const BookingManagement = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center gap-2">
-                          {booking.payment_proof_path && <a href={`http://localhost:5000${booking.payment_proof_path}`} target="_blank" rel="noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="View Payment Proof"><Eye size={18} /></a>}
+                          {booking.payment_proof_path && <a href={` https://rivers-rwanda.onrender.com${booking.payment_proof_path}`} target="_blank" rel="noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="View Payment Proof"><Eye size={18} /></a>}
                           {booking.booking_status === 'pending' && <button onClick={() => handleApprove(booking.id)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Approve Booking"><Check size={18} /></button>}
                           {booking.booking_status === 'approved' && booking.payment_status === 'pending' && <button onClick={() => handleConfirmPayment(booking.id)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg" title="Confirm Payment"><CreditCard size={18} /></button>}
                           {(booking.booking_status === 'confirmed' || booking.booking_status === 'completed') && booking.payment_status === 'paid' && <button onClick={() => setSelectedBookingId(booking.id)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg" title="View Invoice"><Download size={18} /></button>}

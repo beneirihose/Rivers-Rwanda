@@ -43,7 +43,7 @@ const Profile = () => {
         phoneNumber: data.phone_number || ''
       });
       if (data.profile_image) {
-        setProfileImagePreview(`http://localhost:5000${data.profile_image}`);
+        setProfileImagePreview(`https://rivers-rwanda.onrender.com${data.profile_image}`);
       }
     } catch (error) {
       toast.error('Failed to load profile');

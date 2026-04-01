@@ -13,7 +13,7 @@ const BookingDetails = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/bookings/verify/${id}`);
+        const response = await axios.get(` { code: 'en', name: 'ENGLISH', flag: 'https://flagcdn.com/w40/gb.png' },/api/bookings/verify/${id}`);
         setBooking(response.data.data);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Transaction could not be verified.');

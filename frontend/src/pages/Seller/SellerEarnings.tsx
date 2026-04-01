@@ -53,7 +53,7 @@ const SellerEarnings = () => {
     </div>
   );
 
-  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
+  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || '  https://rivers-rwanda.onrender.com/api/v1').replace('/api/v1', '');
   const totalReceived = commissions.reduce((acc, curr) => acc + (curr.status === 'completed' ? Number(curr.amount) : 0), 0);
   // Pending = only 'paid' (money sent but not yet confirmed) — 'approved' is still being processed by admin
   const pendingPayout = commissions.reduce((acc, curr) => acc + (curr.status === 'paid' ? Number(curr.amount) : 0), 0);

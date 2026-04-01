@@ -65,7 +65,7 @@ const AgentEarnings = () => {
     </div>
   );
 
-  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
+  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || '  https://rivers-rwanda.onrender.com/api/v1').replace('/api/v1', '');
   const totalEarned = commissions.reduce((acc, curr) => acc + (curr.status === 'completed' ? Number(curr.amount) : 0), 0);
   const pendingPayout = commissions.reduce((acc, curr) => acc + (curr.status === 'approved' || curr.status === 'paid' ? Number(curr.amount) : 0), 0);
 

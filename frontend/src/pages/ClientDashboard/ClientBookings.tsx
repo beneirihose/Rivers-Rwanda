@@ -175,7 +175,7 @@ const ClientBookings = () => {
                         <td className="px-8 py-6">
                           <div className="flex justify-center gap-2">
                               {b.payment_proof_path && (
-                                  <a href={`http://localhost:5000${b.payment_proof_path}`} target="_blank" rel="noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title={t('dashboard.bookings.actions.viewProof')}><Eye size={18} /></a>
+                                  <a href={`https://rivers-rwanda.onrender.com${b.payment_proof_path}`} target="_blank" rel="noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title={t('dashboard.bookings.actions.viewProof')}><Eye size={18} /></a>
                               )}
                               {(b.booking_status === 'confirmed' || b.booking_status === 'completed') && b.payment_status === 'paid' && (
                                 <button onClick={() => setSelectedBookingId(b.id)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title={t('dashboard.bookings.actions.viewInvoice')}><Download size={18} /></button>

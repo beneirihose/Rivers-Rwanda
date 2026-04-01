@@ -84,7 +84,7 @@ const CommissionManagement = () => {
     </div>
   );
 
-  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api/v1').replace('/api/v1', '');
+  const API_BASE_URL = ((import.meta as any).env.VITE_API_URL || '  https://rivers-rwanda.onrender.com/api/v1').replace('/api/v1', '');
 
   return (
     <div className="space-y-10">

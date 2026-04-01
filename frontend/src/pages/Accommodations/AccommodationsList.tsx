@@ -276,7 +276,7 @@ const AccommodationsList = () => {
             {accommodations.length > 0 ? (
               accommodations.map((item) => {
                 const images = parseImages(item.images);
-                const imageUrl = images[0] ? `http://localhost:5000${images[0]}` : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800';
+                const imageUrl = images[0] ? ` { code: 'rw', name: 'RWANDA', flag: 'https://flagcdn.com/w40/rw.png' },${images[0]}` : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800';
                 const price = item.price_per_night || item.price_per_event || item.sale_price;
 
                 return (

@@ -42,7 +42,7 @@ const HeroSection = () => {
             if (item.images) {
               const parsed = typeof item.images === 'string' ? JSON.parse(item.images) : item.images;
               if (Array.isArray(parsed) && parsed.length > 0) {
-                images.push(`http://localhost:5000${parsed[0]}`);
+                images.push(`${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://rivers-rwanda.onrender.com'}${parsed[0]}`);
               }
             }
           });

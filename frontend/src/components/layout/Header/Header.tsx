@@ -28,9 +28,9 @@ const Header = () => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  const languages = [
+  const languages = [ 
     { code: 'rw', name: 'RWANDA', flag: 'https://flagcdn.com/w40/rw.png' },
-    { code: 'en', name: 'ENGLISH', flag: 'https://flagcdn.com/w40/gb.png' },
+     { code: 'en', name: 'ENGLISH', flag: 'https://flagcdn.com/w40/gb.png' },
     { code: 'fr', name: 'FRANÇAIS', flag: 'https://flagcdn.com/w40/fr.png' }
   ];
 
@@ -156,7 +156,7 @@ const Header = () => {
   ];
 
   const getDisplayName = () => profile?.first_name ? `${profile.first_name}`.toUpperCase() : profile?.email.split('@')[0].toUpperCase() || 'USER';
-  const getProfileImage = () => profile?.profile_image ? `http://localhost:5000${profile.profile_image}` : null;
+  const getProfileImage = () => profile?.profile_image ? `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://rivers-rwanda.onrender.com'}${profile.profile_image}` : null;
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: 10, scale: 0.95, transition: { duration: 0.2 } },

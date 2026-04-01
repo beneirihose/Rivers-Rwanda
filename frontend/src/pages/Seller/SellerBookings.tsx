@@ -264,7 +264,7 @@ const SellerBookings = () => {
                       <div className="flex justify-center">
                         {b.payment_proof_path ? (
                           <a 
-                            href={`http://localhost:5000${b.payment_proof_path}`} 
+                            href={`https://rivers-rwanda.onrender.com${b.payment_proof_path}`} 
                             target="_blank" 
                             rel="noreferrer" 
                             className="p-3 bg-gray-50 text-gray-400 hover:bg-accent-orange hover:text-white rounded-xl transition-all shadow-sm group-hover:shadow-md"
